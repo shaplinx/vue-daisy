@@ -42,7 +42,7 @@ const groups = computed(() => [
           ...categoryChildren,
         ],
       },
-      { id: 'data', label: 'Data Management', to: '/data', icon: Database, badge: 'Soon' },
+      { id: 'data', label: 'Data Management', to: '/data', icon: Database },
       { id: 'forms', label: 'Form Examples', to: '/forms', icon: ClipboardList, badge: 'Soon' },
     ],
   },

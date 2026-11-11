@@ -84,9 +84,9 @@ const highlights = [
 
 const recent = [
   { id: 1, title: 'Component library completed', detail: `${components.length} components across ${componentCategories.length} categories`, tone: 'success' },
-  { id: 2, title: 'Dashboard shell completed', detail: 'Responsive sidebar, topbar, command search and footer', tone: 'primary' },
-  { id: 3, title: 'Theme system completed', detail: 'Light, dark, corporate, business, cupcake and dracula', tone: 'secondary' },
-  { id: 4, title: 'Next up: DataTable', detail: 'Client and server modes with native Laravel pagination', tone: 'warning' },
+  { id: 2, title: 'DataTable completed', detail: 'Reusable table with client and server modes, native Laravel pagination', tone: 'success' },
+  { id: 3, title: 'Users CRUD completed', detail: 'Create, view, edit and delete against the mock Laravel resource', tone: 'success' },
+  { id: 4, title: 'Next up: FormKit forms', detail: 'Schema-driven forms with validation and a matching theme', tone: 'warning' },
 ]
 
 const categoryCards = componentCategories.map((category) => ({
