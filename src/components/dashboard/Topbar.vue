@@ -36,7 +36,7 @@ const emit = defineEmits(['toggle-sidebar', 'toggle-collapse'])
       <PanelLeftClose v-else class="size-5" aria-hidden="true" />
     </button>
 
-    <div class="hidden min-w-0 md:block">
+    <div class="hidden w-full md:block">
       <AppBreadcrumbs />
     </div>
 

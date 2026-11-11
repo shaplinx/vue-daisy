@@ -30,7 +30,10 @@ const items = computed<readonly ToastNotification[]>(() =>
 
 const positionClass = computed(() => {
   const [vertical = 'bottom', horizontal = 'end'] = props.position.split('-')
-  return cn('toast z-[100]', `toast-${vertical}`, `toast-${horizontal}`)
+  // Full width on small screens (the .toast container has a max-width of
+  // 100vw - 2rem, so it keeps a small margin), auto width from `sm` up so the
+  // w-sm alerts below define the width.
+  return cn('toast z-[100] w-full sm:w-auto', `toast-${vertical}`, `toast-${horizontal}`)
 })
 
 const icons: Record<ToastType, Component> = {
@@ -63,7 +66,7 @@ function onClose(notification: ToastNotification): void {
         <div
           v-for="notification in items"
           :key="notification.id"
-          class="alert max-w-sm shadow-lg"
+          class="alert w-full shadow-lg sm:w-sm"
           :class="alertClasses[notification.type] || 'alert-info'"
           role="status"
           @mouseenter="toast.pause(notification.id)"

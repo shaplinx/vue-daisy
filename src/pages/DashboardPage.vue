@@ -112,7 +112,7 @@ const categoryCards = componentCategories.map((category) => ({
       </DzButton>
     </header>
 
-    <DzStat :items="stats" shadow class="w-full" />
+    <DzStat :items="stats" shadow class="w-full bg-base-100" />
 
     <div class="grid gap-4 lg:grid-cols-3">
       <div class="space-y-4 lg:col-span-2">

@@ -3,7 +3,6 @@ import { computed } from 'vue'
 import type { Component, PropType } from 'vue'
 import { RouterLink } from 'vue-router'
 import type { RouteLocationRaw } from 'vue-router'
-import { ChevronRight } from '@lucide/vue'
 
 export interface BreadcrumbItem {
   id?: string | number
@@ -44,11 +43,6 @@ const visibleItems = computed<BreadcrumbItem[]>(() => props.items)
           </span>
         </slot>
         <component :is="separator" v-if="separator && index < visibleItems.length - 1" aria-hidden="true" />
-        <ChevronRight
-          v-else-if="!separator && index < visibleItems.length - 1"
-          class="size-3.5 opacity-40"
-          aria-hidden="true"
-        />
       </li>
     </ul>
   </div>

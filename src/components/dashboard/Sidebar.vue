@@ -71,30 +71,30 @@ function onSelect({ item }: { item: MenuItemData }) {
 </script>
 
 <template>
-  <div class="flex h-full flex-col">
-    <div class="flex h-16 items-center gap-3 border-b border-base-300 px-4">
+  <div class="flex w-full flex-1 flex-col">
+    <div class="flex h-16 items-center gap-3 border-b border-base-300 px-4 is-drawer-close:justify-center">
       <RouterLink to="/components" class="flex min-w-0 items-center gap-2.5" aria-label="Vue Daisy home">
         <span class="flex size-9 shrink-0 items-center justify-center rounded-box bg-primary text-primary-content shadow-sm">
           <Blocks class="size-5" aria-hidden="true" />
         </span>
-        <span class="sidebar-hide-collapsed min-w-0">
+        <span class="min-w-0 is-drawer-close:hidden">
           <span class="block truncate text-sm font-bold tracking-tight">Vue Daisy</span>
           <span class="block truncate text-[11px] opacity-50">Component Library</span>
         </span>
       </RouterLink>
     </div>
 
-    <div class="flex-1 overflow-y-auto px-2 py-3">
+    <div class="flex-1 py-3">
       <template v-for="group in groups" :key="group.id">
         <p
-          v-if="!collapsed"
-          class="sidebar-hide-collapsed px-3 pb-1 pt-3 text-[10px] font-semibold uppercase tracking-widest opacity-40"
+          class="px-3 pb-1 pt-3 text-[10px] font-semibold uppercase tracking-widest opacity-40 is-drawer-close:hidden"
         >
           {{ group.header }}
         </p>
         <DzMenu
           :items="group.items"
           :active-id="typeof route.name === 'string' ? route.name : null"
+          :icon-only="collapsed"
           class="mb-1"
           @select="onSelect"
         />
@@ -107,12 +107,13 @@ function onSelect({ item }: { item: MenuItemData }) {
         size="sm"
         block
         :aria-label="collapsed ? 'Expand sidebar' : 'Collapse sidebar'"
-        class="justify-center"
+        :data-tip="collapsed ? 'Expand sidebar' : undefined"
+        class="justify-center is-drawer-close:tooltip is-drawer-close:tooltip-right"
         @click="emit('toggle')"
       >
         <ChevronsRight v-if="collapsed" class="size-4" aria-hidden="true" />
         <ChevronsLeft v-else class="size-4" aria-hidden="true" />
-        <span v-if="!collapsed" class="sidebar-hide-collapsed">Collapse</span>
+        <span class="is-drawer-close:hidden">Collapse</span>
       </DzButton>
     </div>
   </div>
