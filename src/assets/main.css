@@ -5,6 +5,26 @@
   logs: false;
 }
 
+/*
+ * Safelist for classes that only ever get assembled at runtime by the
+ * `modifier()` helper in src/utils/daisy.ts (and a few template literals).
+ * Tailwind/daisyUI emit only classes they find as literal candidates in
+ * scanned source files, so without this list every `btn-primary`,
+ * `btn-outline`, `chat-bubble-primary`, `loading-bars`, ... would be
+ * missing from the built CSS.
+ *
+ * Keep these patterns in sync with COLORS/SIZES and the per-component
+ * modifier lists in src/utils/daisy.ts.
+ */
+@source inline("{btn,badge,alert,link,radio,checkbox,toggle,range,select,file-input,input,textarea,otp,status,progress,chat-bubble,divider,step,tooltip,countdown,kbd,text,bg,ring}-{neutral,primary,secondary,accent,info,success,warning,error}");
+@source inline("{btn,badge,radio,checkbox,toggle,range,select,file-input,input,textarea,otp,status,progress,countdown,rating,join,dock,table,tabs,loading,kbd}-{xs,sm,md,lg,xl}");
+@source inline("{btn,badge,alert}-{outline,soft,dash,ghost,link}");
+@source inline("tabs-{box,border,lift}");
+@source inline("loading-{spinner,dots,ring,ball,bars,infinity}");
+@source inline("tooltip-{top,bottom,left,right,start,center,end}");
+@source inline("divider-{start,end,center}");
+@source inline("toast-{top,middle,bottom,start,center,end}");
+
 :root {
   color-scheme: light;
 }
