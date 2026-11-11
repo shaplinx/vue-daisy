@@ -14,8 +14,6 @@ const props = defineProps({
   bordered: { type: Boolean, default: false },
   title: { type: String, default: '' },
   ariaLabel: { type: String, default: 'Menu' },
-  /** Collapse items to icons with tooltips while the parent drawer is closed. */
-  iconOnly: { type: Boolean, default: false },
 })
 
 const emit = defineEmits<{
@@ -45,7 +43,6 @@ const classes = computed(() =>
         :key="item.id ?? index"
         :item="item"
         :active-id="activeId"
-        :icon-only="iconOnly"
         @select="emit('select', $event)"
       />
     </slot>

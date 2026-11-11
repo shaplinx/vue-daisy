@@ -22,12 +22,6 @@ const props = defineProps({
   item: { type: Object as PropType<MenuItemData>, required: true },
   activeId: { type: [String, Number] as PropType<string | number | null>, default: null },
   level: { type: Number, default: 0 },
-  /**
-   * Icon-only mode for collapsible drawer sidebars. When the drawer is closed
-   * (daisyUI `is-drawer-close` state) labels, badges and sub lists collapse
-   * and each item shows its label as a tooltip next to its icon.
-   */
-  iconOnly: { type: Boolean, default: false },
 })
 
 const emit = defineEmits<{
@@ -44,25 +38,6 @@ const childActive = computed(
 )
 
 const active = computed(() => isActive(props.item))
-
-/** Classes that only take effect while the parent drawer is closed. */
-const iconOnlyClasses = computed(() =>
-  props.iconOnly ? 'is-drawer-close:tooltip is-drawer-close:tooltip-right' : undefined,
-)
-
-const hideWhenCollapsedClasses = computed(() => (props.iconOnly ? 'is-drawer-close:hidden' : undefined))
-
-const tooltip = computed(() => (props.iconOnly ? props.item.label : undefined))
-
-/**
- * In icon-only mode a parent with children becomes a direct link to its first
- * destination: the collapsed rail has no room to expand the sub list.
- */
-const parentDestination = computed(() => {
-  if (props.item.to) return props.item.to
-  if (hasChildren.value) return props.item.children?.find((child) => child.to)?.to
-  return undefined
-})
 
 function isActive(item: MenuItemData | undefined): boolean {
   if (!item) return false
@@ -99,40 +74,20 @@ function onChildSelect(payload: { item: MenuItemData; event: MouseEvent }): void
     <slot name="header" :item="item">{{ item.header }}</slot>
   </li>
 
-  <!-- Icon-only rail: a parent with children navigates to its first destination. -->
-  <li v-else-if="iconOnly && hasChildren && parentDestination">
-    <RouterLink
-      :to="parentDestination"
-      :class="[{ 'menu-active': active }, iconOnlyClasses]"
-      :data-tip="tooltip"
-      :aria-current="active ? 'page' : undefined"
-      @click="onSelect"
-    >
-      <component :is="item.icon" v-if="item.icon" class="size-4 shrink-0" aria-hidden="true" />
-      <span class="menu-label-text flex-1" :class="hideWhenCollapsedClasses">{{ item.label }}</span>
-      <span v-if="item.badge" class="badge badge-sm badge-primary" :class="hideWhenCollapsedClasses">
-        {{ item.badge }}
-      </span>
-    </RouterLink>
-  </li>
-
   <li v-else-if="hasChildren">
     <details :open="childActive">
-      <summary :class="[{ 'menu-active': active }, iconOnlyClasses]" :data-tip="tooltip">
+      <summary :class="{ 'menu-active': active }">
         <component :is="item.icon" v-if="item.icon" class="size-4 shrink-0" aria-hidden="true" />
-        <span class="menu-label-text flex-1" :class="hideWhenCollapsedClasses">{{ item.label }}</span>
-        <span v-if="item.badge" class="badge badge-sm badge-primary" :class="hideWhenCollapsedClasses">
-          {{ item.badge }}
-        </span>
+        <span class="menu-label-text flex-1">{{ item.label }}</span>
+        <span v-if="item.badge" class="badge badge-sm badge-primary">{{ item.badge }}</span>
       </summary>
-      <ul class="my-0.5" :class="hideWhenCollapsedClasses">
+      <ul>
         <DzMenuItem
           v-for="(child, index) in item.children"
           :key="child.id ?? index"
           :item="child"
           :active-id="activeId"
           :level="level + 1"
-          :icon-only="iconOnly"
           @select="onChildSelect"
         />
       </ul>
@@ -143,42 +98,35 @@ function onChildSelect(payload: { item: MenuItemData; event: MouseEvent }): void
     <RouterLink
       v-if="item.to && !item.disabled"
       :to="item.to"
-      :class="[{ 'menu-active': active }, iconOnlyClasses]"
-      :data-tip="tooltip"
+      :class="{ 'menu-active': active }"
       :aria-current="active ? 'page' : undefined"
       @click="onSelect"
     >
       <component :is="item.icon" v-if="item.icon" class="size-4 shrink-0" aria-hidden="true" />
-      <span class="menu-label-text flex-1" :class="hideWhenCollapsedClasses">{{ item.label }}</span>
-      <span v-if="item.badge" class="badge badge-sm badge-primary" :class="hideWhenCollapsedClasses">
-        {{ item.badge }}
-      </span>
+      <span class="menu-label-text flex-1">{{ item.label }}</span>
+      <span v-if="item.badge" class="badge badge-sm badge-primary">{{ item.badge }}</span>
     </RouterLink>
 
     <a
       v-else-if="item.href && !item.disabled"
       :href="item.href"
-      :class="[{ 'menu-active': active }, iconOnlyClasses]"
-      :data-tip="tooltip"
+      :class="{ 'menu-active': active }"
       @click="onSelect"
     >
       <component :is="item.icon" v-if="item.icon" class="size-4 shrink-0" aria-hidden="true" />
-      <span class="menu-label-text flex-1" :class="hideWhenCollapsedClasses">{{ item.label }}</span>
+      <span class="menu-label-text flex-1">{{ item.label }}</span>
     </a>
 
     <button
       v-else
       type="button"
-      :class="[{ 'menu-active': active }, iconOnlyClasses]"
-      :data-tip="tooltip"
+      :class="{ 'menu-active': active }"
       :disabled="item.disabled"
       @click="!item.disabled && onSelect($event)"
     >
       <component :is="item.icon" v-if="item.icon" class="size-4 shrink-0" aria-hidden="true" />
-      <span class="menu-label-text flex-1" :class="hideWhenCollapsedClasses">{{ item.label }}</span>
-      <span v-if="item.badge" class="badge badge-sm badge-primary" :class="hideWhenCollapsedClasses">
-        {{ item.badge }}
-      </span>
+      <span class="menu-label-text flex-1">{{ item.label }}</span>
+      <span v-if="item.badge" class="badge badge-sm badge-primary">{{ item.badge }}</span>
     </button>
   </li>
 </template>

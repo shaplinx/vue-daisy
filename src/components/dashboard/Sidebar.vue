@@ -3,8 +3,6 @@ import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
   Blocks,
-  ChevronsLeft,
-  ChevronsRight,
   ClipboardList,
   Component,
   Database,
@@ -14,15 +12,9 @@ import {
 } from '@lucide/vue'
 import DzMenu from '@/components/ui/navigation/DzMenu.vue'
 import type { MenuItemData } from '@/components/ui/navigation/DzMenuItem.vue'
-import DzButton from '@/components/ui/actions/DzButton.vue'
 import { componentCategories } from '@/data/componentRegistry'
 
-const props = defineProps({
-  collapsed: { type: Boolean, default: false },
-})
-
 const emit = defineEmits<{
-  toggle: []
   navigate: [item: MenuItemData]
 }>()
 const route = useRoute()
@@ -72,12 +64,12 @@ function onSelect({ item }: { item: MenuItemData }) {
 
 <template>
   <div class="flex w-full flex-1 flex-col">
-    <div class="flex h-16 items-center gap-3 border-b border-base-300 px-4 is-drawer-close:justify-center">
+    <div class="flex h-16 items-center gap-3 border-b border-base-300 px-4">
       <RouterLink to="/components" class="flex min-w-0 items-center gap-2.5" aria-label="Vue Daisy home">
         <span class="flex size-9 shrink-0 items-center justify-center rounded-box bg-primary text-primary-content shadow-sm">
           <Blocks class="size-5" aria-hidden="true" />
         </span>
-        <span class="min-w-0 is-drawer-close:hidden">
+        <span class="min-w-0">
           <span class="block truncate text-sm font-bold tracking-tight">Vue Daisy</span>
           <span class="block truncate text-[11px] opacity-50">Component Library</span>
         </span>
@@ -86,35 +78,16 @@ function onSelect({ item }: { item: MenuItemData }) {
 
     <div class="flex-1 py-3">
       <template v-for="group in groups" :key="group.id">
-        <p
-          class="px-3 pb-1 pt-3 text-[10px] font-semibold uppercase tracking-widest opacity-40 is-drawer-close:hidden"
-        >
+        <p class="px-3 pb-1 pt-3 text-[10px] font-semibold uppercase tracking-widest opacity-40">
           {{ group.header }}
         </p>
         <DzMenu
           :items="group.items"
           :active-id="typeof route.name === 'string' ? route.name : null"
-          :icon-only="collapsed"
           class="mb-1"
           @select="onSelect"
         />
       </template>
-    </div>
-
-    <div class="border-t border-base-300 p-3">
-      <DzButton
-        variant="ghost"
-        size="sm"
-        block
-        :aria-label="collapsed ? 'Expand sidebar' : 'Collapse sidebar'"
-        :data-tip="collapsed ? 'Expand sidebar' : undefined"
-        class="justify-center is-drawer-close:tooltip is-drawer-close:tooltip-right"
-        @click="emit('toggle')"
-      >
-        <ChevronsRight v-if="collapsed" class="size-4" aria-hidden="true" />
-        <ChevronsLeft v-else class="size-4" aria-hidden="true" />
-        <span class="is-drawer-close:hidden">Collapse</span>
-      </DzButton>
     </div>
   </div>
 </template>

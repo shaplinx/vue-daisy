@@ -1,16 +1,12 @@
 <script setup lang="ts">
-import { Menu, PanelLeftClose, PanelLeftOpen } from '@lucide/vue'
+import { Menu } from '@lucide/vue'
 import AppBreadcrumbs from './AppBreadcrumbs.vue'
 import GlobalSearch from './GlobalSearch.vue'
 import ThemeMenu from './ThemeMenu.vue'
 import NotificationMenu from './NotificationMenu.vue'
 import UserMenu from './UserMenu.vue'
 
-defineProps({
-  collapsed: { type: Boolean, default: false },
-})
-
-const emit = defineEmits(['toggle-sidebar', 'toggle-collapse'])
+const emit = defineEmits(['toggle-sidebar'])
 </script>
 
 <template>
@@ -24,16 +20,6 @@ const emit = defineEmits(['toggle-sidebar', 'toggle-collapse'])
       @click="emit('toggle-sidebar')"
     >
       <Menu class="size-5" aria-hidden="true" />
-    </button>
-
-    <button
-      type="button"
-      class="btn btn-ghost btn-square hidden lg:inline-flex"
-      :aria-label="collapsed ? 'Expand sidebar' : 'Collapse sidebar'"
-      @click="emit('toggle-collapse')"
-    >
-      <PanelLeftOpen v-if="collapsed" class="size-5" aria-hidden="true" />
-      <PanelLeftClose v-else class="size-5" aria-hidden="true" />
     </button>
 
     <div class="hidden w-full md:block">

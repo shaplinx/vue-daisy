@@ -36,7 +36,6 @@ function savePreferences() {
 function resetPreferences() {
   try {
     localStorage.removeItem('vue-daisy:theme')
-    localStorage.removeItem('vue-daisy:sidebar-open')
     localStorage.removeItem(SETTINGS_KEY)
   } catch {
     // Ignore storage failures.
