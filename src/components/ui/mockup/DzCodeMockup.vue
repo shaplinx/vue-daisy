@@ -1,15 +1,23 @@
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue'
+import type { PropType } from 'vue'
+import type { ClassValue } from '@/utils/cn'
 import { cn } from '@/utils/cn'
 
 const props = defineProps({
-  lines: { type: Array, default: () => [] },
+  lines: { type: Array as PropType<Array<string | Record<string, string>>>, default: () => [] },
   prefix: { type: String, default: '$' },
   showLineNumbers: { type: Boolean, default: false },
-  contentClass: { type: [String, Array, Object], default: '' },
+  contentClass: { type: [String, Array, Object] as PropType<ClassValue>, default: '' },
 })
 
-const normalized = computed(() =>
+interface CodeMockupLine {
+  text?: string
+  prefix?: string
+  class?: string
+}
+
+const normalized = computed<CodeMockupLine[]>(() =>
   props.lines.map((line) =>
     typeof line === 'string' ? { text: line } : { prefix: props.prefix, ...line },
   ),

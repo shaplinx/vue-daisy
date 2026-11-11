@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { computed, useId } from 'vue'
 import { cn } from '@/utils/cn'
 
@@ -23,9 +23,9 @@ const rootClass = computed(() =>
 
 const sideClass = computed(() => cn('drawer-side z-40', props.width))
 
-function onChange(event) {
-  emit('update:modelValue', event.target.checked)
-  emit('change', event.target.checked)
+function onChange(event: Event): void {
+  emit('update:modelValue', (event.target as HTMLInputElement).checked)
+  emit('change', (event.target as HTMLInputElement).checked)
 }
 </script>
 

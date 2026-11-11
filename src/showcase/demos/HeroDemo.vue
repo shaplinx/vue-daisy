@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { ArrowRight, Sparkles } from '@lucide/vue'
 import { gradientA, gradientE } from '@/showcase/demoAssets'
 import { useDemoMode } from '@/showcase/useDemoMode'

@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { UserRound } from '@lucide/vue'
 import { gradientA, gradientB } from '@/showcase/demoAssets'
 import { useDemoMode } from '@/showcase/useDemoMode'

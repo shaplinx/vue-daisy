@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { Bell, Heart, Home, Search, Settings, User } from '@lucide/vue'
 import { gradientC } from '@/showcase/demoAssets'
 import { useDemoMode } from '@/showcase/useDemoMode'

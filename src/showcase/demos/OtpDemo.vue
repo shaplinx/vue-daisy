@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import { useToast } from '@/composables/useToast'
 import { useDemoMode } from '@/showcase/useDemoMode'
@@ -9,7 +9,7 @@ const code = ref('')
 const shortCode = ref('')
 const joinedCode = ref('')
 
-function verify(value) {
+function verify(value: string) {
   toast.success(`Code ${value} submitted`)
 }
 </script>

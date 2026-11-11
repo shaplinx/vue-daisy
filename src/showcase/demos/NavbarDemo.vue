@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { Bell, Blocks, Search } from '@lucide/vue'
 import { useDemoMode } from '@/showcase/useDemoMode'
 

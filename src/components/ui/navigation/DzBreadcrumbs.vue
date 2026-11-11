@@ -1,15 +1,28 @@
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue'
+import type { Component, PropType } from 'vue'
 import { RouterLink } from 'vue-router'
+import type { RouteLocationRaw } from 'vue-router'
 import { ChevronRight } from '@lucide/vue'
 
+export interface BreadcrumbItem {
+  id?: string | number
+  label?: string
+  to?: RouteLocationRaw
+  href?: string
+  icon?: Component
+}
+
 const props = defineProps({
-  items: { type: Array, default: () => [] },
-  separator: { type: [String, Object, Function], default: null },
+  items: { type: Array as PropType<BreadcrumbItem[]>, default: () => [] },
+  separator: {
+    type: [String, Object, Function] as PropType<string | Component | null>,
+    default: null,
+  },
   ariaLabel: { type: String, default: 'Breadcrumb' },
 })
 
-const visibleItems = computed(() => props.items)
+const visibleItems = computed<BreadcrumbItem[]>(() => props.items)
 </script>
 
 <template>

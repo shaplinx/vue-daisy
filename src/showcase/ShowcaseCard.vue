@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { computed, ref } from 'vue'
 import { Code2, Eye, ListTree, Palette } from '@lucide/vue'
 import DemoSection from './DemoSection.vue'

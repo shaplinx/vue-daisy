@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { computed, useId } from 'vue'
 import { CalendarDays } from '@lucide/vue'
 import DzInput from './DzInput.vue'

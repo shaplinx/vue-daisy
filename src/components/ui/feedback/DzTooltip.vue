@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { cn } from '@/utils/cn'
 import { modifier, COLORS } from '@/utils/daisy'
@@ -15,7 +15,7 @@ const props = defineProps({
 })
 
 const visible = ref(false)
-let timer
+let timer: ReturnType<typeof setTimeout> | undefined
 
 const isControlled = computed(() => props.open !== undefined)
 const isOpen = computed(() => (isControlled.value ? props.open : visible.value))

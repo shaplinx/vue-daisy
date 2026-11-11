@@ -1,8 +1,9 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import { Blocks, LayoutDashboard, Palette, Settings, Table2, Users } from '@lucide/vue'
 import { useToast } from '@/composables/useToast'
 import { useDemoMode } from '@/showcase/useDemoMode'
+import type { MenuItemData } from '@/components/ui/navigation/DzMenuItem.vue'
 
 const mode = useDemoMode()
 const toast = useToast()
@@ -23,8 +24,8 @@ const items = [
   { id: 'settings', label: 'Settings', icon: Settings, to: '/settings' },
 ]
 
-function onSelect({ item }) {
-  activeId.value = item.id
+function onSelect({ item }: { item: MenuItemData }) {
+  activeId.value = String(item.id ?? '')
   toast.info(`Menu item selected: ${item.label}`)
 }
 </script>

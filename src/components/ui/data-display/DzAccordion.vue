@@ -1,40 +1,57 @@
-<script setup>
+<script setup lang="ts">
 import { computed, ref, useId } from 'vue'
+import type { Component, PropType } from 'vue'
 import { ChevronDown } from '@lucide/vue'
 import { cn } from '@/utils/cn'
 
+export interface AccordionItem {
+  id?: string | number
+  key?: string | number
+  title?: string
+  content?: string
+  icon?: Component
+  [key: string]: unknown
+}
+
+export type AccordionValue = Array<string | number> | string | number | null
+
 const props = defineProps({
-  items: { type: Array, default: () => [] },
-  modelValue: { type: [Array, String, Number], default: undefined },
+  items: { type: Array as PropType<AccordionItem[]>, default: () => [] },
+  modelValue: { type: [Array, String, Number] as PropType<AccordionValue>, default: undefined },
   multiple: { type: Boolean, default: false },
   bordered: { type: Boolean, default: false },
   icon: { type: String, default: 'arrow' },
 })
 
-const emit = defineEmits(['update:modelValue', 'change'])
+const emit = defineEmits<{
+  'update:modelValue': [value: AccordionValue]
+  change: [openIds: Array<string | number>]
+}>()
+
 const uid = useId()
-const internal = ref([])
+const internal = ref<Array<string | number>>([])
 
 const isControlled = computed(() => props.modelValue !== undefined)
 
-const openIds = computed(() => {
+const openIds = computed<Array<string | number>>(() => {
   if (isControlled.value) {
-    return Array.isArray(props.modelValue) ? props.modelValue : [props.modelValue]
+    if (Array.isArray(props.modelValue)) return props.modelValue
+    return props.modelValue == null ? [] : [props.modelValue]
   }
   return internal.value
 })
 
-function itemId(item, index) {
+function itemId(item: AccordionItem, index: number): string | number {
   return item.id ?? item.key ?? index
 }
 
-function isOpen(item, index) {
+function isOpen(item: AccordionItem, index: number): boolean {
   return openIds.value.includes(itemId(item, index))
 }
 
-function toggle(item, index) {
+function toggle(item: AccordionItem, index: number): void {
   const id = itemId(item, index)
-  let next
+  let next: Array<string | number>
   if (props.multiple) {
     next = isOpen(item, index)
       ? openIds.value.filter((value) => value !== id)
@@ -48,11 +65,11 @@ function toggle(item, index) {
   emit('change', next)
 }
 
-function panelId(item, index) {
+function panelId(item: AccordionItem, index: number): string {
   return `${uid}-panel-${itemId(item, index)}`
 }
 
-function headerId(item, index) {
+function headerId(item: AccordionItem, index: number): string {
   return `${uid}-header-${itemId(item, index)}`
 }
 </script>

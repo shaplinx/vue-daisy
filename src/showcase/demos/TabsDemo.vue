@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import { Bell, Palette, Settings, UserRound } from '@lucide/vue'
 import { useDemoMode } from '@/showcase/useDemoMode'
@@ -13,7 +13,7 @@ const tabs = [
   { id: 'advanced', label: 'Advanced', icon: Settings, disabled: true },
 ]
 
-const panels = {
+const panels: Record<string, string> = {
   profile: 'Update your name, avatar and contact details here.',
   appearance: 'Choose a theme and configure how the interface looks.',
   notifications: 'Decide which events should trigger an email or in-app alert.',

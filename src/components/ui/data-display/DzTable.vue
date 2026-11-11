@@ -1,13 +1,34 @@
-<script setup>
+<script setup lang="ts">
 import { computed, ref, useId, watch } from 'vue'
+import type { PropType } from 'vue'
 import { ArrowDown, ArrowUp, ArrowUpDown, LoaderCircle } from '@lucide/vue'
 import { cn } from '@/utils/cn'
 import { modifier, SIZES } from '@/utils/daisy'
 
+export interface TableRow {
+  [key: string]: unknown
+}
+
+export interface TableColumn {
+  key: string
+  label?: string
+  align?: 'start' | 'center' | 'end'
+  sortable?: boolean
+  width?: string
+  headerClass?: string
+  class?: string
+  sorter?: (a: TableRow, b: TableRow, direction: 'asc' | 'desc') => number
+  formatter?: (value: unknown, row: TableRow, column: TableColumn, index: number) => unknown
+}
+
+export type TableSortDirection = 'asc' | 'desc'
+
+type RowKey = string | ((row: TableRow, index: number) => string | number)
+
 const props = defineProps({
-  columns: { type: Array, default: () => [] },
-  rows: { type: Array, default: () => [] },
-  rowKey: { type: [String, Function], default: 'id' },
+  columns: { type: Array as PropType<TableColumn[]>, default: () => [] },
+  rows: { type: Array as PropType<TableRow[]>, default: () => [] },
+  rowKey: { type: [String, Function] as PropType<RowKey>, default: 'id' },
   caption: { type: String, default: '' },
   zebra: { type: Boolean, default: false },
   hover: { type: Boolean, default: true },
@@ -19,21 +40,21 @@ const props = defineProps({
   loadingRows: { type: Number, default: 5 },
   emptyText: { type: String, default: 'No records found' },
   selectable: { type: Boolean, default: false },
-  selected: { type: Array, default: () => [] },
+  selected: { type: Array as PropType<Array<string | number>>, default: () => [] },
   clientSort: { type: Boolean, default: true },
   ariaLabel: { type: String, default: 'Data table' },
 })
 
-const emit = defineEmits([
-  'update:selected',
-  'row-click',
-  'sort-change',
-  'select-all',
-])
+const emit = defineEmits<{
+  'update:selected': [value: Array<string | number>]
+  'row-click': [payload: { row: TableRow; index: number }]
+  'sort-change': [payload: { key: string; direction: TableSortDirection }]
+  'select-all': [value: Array<string | number>]
+}>()
 
 const uid = useId()
 const sortKey = ref('')
-const sortDirection = ref('asc')
+const sortDirection = ref<TableSortDirection>('asc')
 
 const tableClass = computed(() =>
   cn('table', modifier('table', props.size, SIZES), {
@@ -44,7 +65,7 @@ const tableClass = computed(() =>
   }),
 )
 
-const sortedRows = computed(() => {
+const sortedRows = computed<TableRow[]>(() => {
   if (!props.clientSort || !sortKey.value) return props.rows
   const column = props.columns.find((item) => item.key === sortKey.value)
   const rows = [...props.rows]
@@ -69,16 +90,17 @@ const someSelected = computed(
   () => props.selected.length > 0 && !allSelected.value,
 )
 
-function keyFor(row, index) {
+function keyFor(row: TableRow, index = 0): string | number {
   if (typeof props.rowKey === 'function') return props.rowKey(row, index)
-  return row[props.rowKey] ?? index
+  const value = row[props.rowKey]
+  return value === undefined || value === null ? index : (value as string | number)
 }
 
-function isSelected(row, index) {
+function isSelected(row: TableRow, index: number): boolean {
   return props.selected.includes(keyFor(row, index))
 }
 
-function toggleRow(row, index) {
+function toggleRow(row: TableRow, index: number): void {
   const key = keyFor(row, index)
   const next = props.selected.includes(key)
     ? props.selected.filter((value) => value !== key)
@@ -86,13 +108,13 @@ function toggleRow(row, index) {
   emit('update:selected', next)
 }
 
-function toggleAll() {
+function toggleAll(): void {
   const next = allSelected.value ? [] : props.rows.map((row, index) => keyFor(row, index))
   emit('update:selected', next)
   emit('select-all', next)
 }
 
-function toggleSort(column) {
+function toggleSort(column: TableColumn): void {
   if (!column.sortable) return
   if (sortKey.value !== column.key) {
     sortKey.value = column.key
@@ -103,11 +125,15 @@ function toggleSort(column) {
   emit('sort-change', { key: sortKey.value, direction: sortDirection.value })
 }
 
-function alignClass(align) {
-  return { 'text-start': align === 'start', 'text-center': align === 'center', 'text-end': align === 'end' }
+function alignClass(align?: string): Record<string, boolean> {
+  return {
+    'text-start': align === 'start',
+    'text-center': align === 'center',
+    'text-end': align === 'end',
+  }
 }
 
-function cellValue(row, column, index) {
+function cellValue(row: TableRow, column: TableColumn, index: number): unknown {
   if (column.formatter) return column.formatter(row[column.key], row, column, index)
   return row[column.key]
 }

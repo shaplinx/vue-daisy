@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { Activity, BarChart3, CreditCard, DollarSign, Users } from '@lucide/vue'
 import { gradientD } from '@/showcase/demoAssets'
 import { useDemoMode } from '@/showcase/useDemoMode'

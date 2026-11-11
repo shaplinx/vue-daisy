@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { RotateCcw, Timer } from '@lucide/vue'
 import { useDemoMode } from '@/showcase/useDemoMode'
@@ -6,7 +6,7 @@ import { useDemoMode } from '@/showcase/useDemoMode'
 const mode = useDemoMode()
 const seconds = ref(12)
 const running = ref(true)
-let timer
+let timer: ReturnType<typeof setInterval> | undefined
 
 function reset() {
   seconds.value = 12

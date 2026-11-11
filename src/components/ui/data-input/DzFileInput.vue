@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { computed, ref } from 'vue'
 import { FileUp, X } from '@lucide/vue'
 import { cn } from '@/utils/cn'
@@ -14,10 +14,13 @@ const props = defineProps({
   label: { type: String, default: 'Choose file' },
 })
 
-const emit = defineEmits(['change', 'clear'])
+const emit = defineEmits<{
+  change: [payload: { files: File[]; event: Event }]
+  clear: []
+}>()
 
-const input = ref(null)
-const files = ref([])
+const input = ref<HTMLInputElement | null>(null)
+const files = ref<File[]>([])
 
 const classes = computed(() =>
   cn(
@@ -28,12 +31,13 @@ const classes = computed(() =>
   ),
 )
 
-function onChange(event) {
-  files.value = Array.from(event.target.files || [])
+function onChange(event: Event): void {
+  const target = event.target as HTMLInputElement
+  files.value = Array.from(target.files ?? [])
   emit('change', { files: files.value, event })
 }
 
-function clear() {
+function clear(): void {
   files.value = []
   if (input.value) input.value.value = ''
   emit('clear')

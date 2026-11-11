@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 const props = defineProps({
   legend: { type: String, default: '' },
   hint: { type: String, default: '' },

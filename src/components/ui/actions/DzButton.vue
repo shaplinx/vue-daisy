@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { computed, useAttrs } from 'vue'
 import { RouterLink } from 'vue-router'
 import { LoaderCircle } from '@lucide/vue'
@@ -67,7 +67,7 @@ const linkAttrs = computed(() => {
   return {}
 })
 
-function onClick(event) {
+function onClick(event: Event): void {
   if (isDisabled.value) {
     event.preventDefault()
     event.stopPropagation()

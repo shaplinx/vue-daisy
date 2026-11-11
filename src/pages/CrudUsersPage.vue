@@ -1,3 +1,7 @@
+<script setup lang="ts">
+// Placeholder page — CRUD implementation arrives in milestone 3.
+</script>
+
 <template>
   <section class="space-y-6">
     <header class="space-y-1">

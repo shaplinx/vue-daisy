@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue'
 import { cn } from '@/utils/cn'
 import { modifier, COLORS, SIZES } from '@/utils/daisy'
@@ -19,8 +19,8 @@ const classes = computed(() =>
   cn('toggle', modifier('toggle', props.size, SIZES), modifier('toggle', props.color, COLORS)),
 )
 
-function onChange(event) {
-  emit('update:modelValue', event.target.checked)
+function onChange(event: Event): void {
+  emit('update:modelValue', (event.target as HTMLInputElement).checked)
   emit('change', event)
 }
 </script>

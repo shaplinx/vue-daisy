@@ -1,5 +1,6 @@
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue'
+import type { Component, PropType } from 'vue'
 import {
   AlertTriangle,
   CheckCircle2,
@@ -8,10 +9,14 @@ import {
   XCircle,
 } from '@lucide/vue'
 import { useToast } from '@/composables/useToast'
+import type { ToastNotification, ToastType } from '@/composables/useToast'
 import { cn } from '@/utils/cn'
 
 const props = defineProps({
-  notifications: { type: Array, default: null },
+  notifications: {
+    type: Array as PropType<readonly ToastNotification[] | null>,
+    default: null,
+  },
   position: { type: String, default: 'bottom-end' },
   max: { type: Number, default: 5 },
   ariaLabel: { type: String, default: 'Notifications' },
@@ -19,32 +24,34 @@ const props = defineProps({
 
 const toast = useToast()
 
-const items = computed(() => (props.notifications ?? toast.notifications).slice(-props.max))
+const items = computed<readonly ToastNotification[]>(() =>
+  (props.notifications ?? toast.notifications).slice(-props.max),
+)
 
 const positionClass = computed(() => {
   const [vertical = 'bottom', horizontal = 'end'] = props.position.split('-')
   return cn('toast z-[100]', `toast-${vertical}`, `toast-${horizontal}`)
 })
 
-const icons = {
+const icons: Record<ToastType, Component> = {
   success: CheckCircle2,
   error: XCircle,
   warning: AlertTriangle,
   info: Info,
 }
 
-const alertClasses = {
+const alertClasses: Record<ToastType, string> = {
   success: 'alert-success',
   error: 'alert-error',
   warning: 'alert-warning',
   info: 'alert-info',
 }
 
-function iconFor(type) {
+function iconFor(type: ToastType): Component {
   return icons[type] || Info
 }
 
-function onClose(notification) {
+function onClose(notification: ToastNotification): void {
   if (notification.dismissible) toast.remove(notification.id)
 }
 </script>

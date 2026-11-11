@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { Blocks } from '@lucide/vue'
 import { useDemoMode } from '@/showcase/useDemoMode'
 

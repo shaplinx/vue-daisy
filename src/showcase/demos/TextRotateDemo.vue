@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { useDemoMode } from '@/showcase/useDemoMode'
 
 const mode = useDemoMode()

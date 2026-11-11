@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import { Blocks, LayoutDashboard, Menu, Settings, Users } from '@lucide/vue'
 import { useDemoMode } from '@/showcase/useDemoMode'

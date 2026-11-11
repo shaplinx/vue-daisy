@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { computed, provide } from 'vue'
 import { DEMO_MODE_KEY } from '@/showcase/useDemoMode'
 

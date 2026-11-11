@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { ArrowRight, Database, Filter, Server, Table2, Users } from '@lucide/vue'
 
 const planned = [

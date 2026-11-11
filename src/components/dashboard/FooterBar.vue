@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { Blocks, BookOpen } from '@lucide/vue'
 
 const year = new Date().getFullYear()

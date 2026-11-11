@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import { carouselSlides } from '@/showcase/demoAssets'
 import { useDemoMode } from '@/showcase/useDemoMode'

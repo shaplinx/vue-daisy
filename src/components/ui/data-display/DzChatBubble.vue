@@ -1,5 +1,7 @@
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue'
+import type { PropType } from 'vue'
+import type { ClassValue } from '@/utils/cn'
 import { cn } from '@/utils/cn'
 import { modifier, COLORS } from '@/utils/daisy'
 
@@ -11,7 +13,7 @@ const props = defineProps({
   time: { type: String, default: '' },
   footer: { type: String, default: '' },
   loading: { type: Boolean, default: false },
-  bubbleClass: { type: [String, Array, Object], default: '' },
+  bubbleClass: { type: [String, Array, Object] as PropType<ClassValue>, default: '' },
 })
 
 const classes = computed(() =>

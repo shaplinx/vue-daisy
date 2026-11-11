@@ -1,56 +1,84 @@
-<script setup>
+<script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, ref } from 'vue'
+import type { Component, PropType } from 'vue'
 import { RouterLink } from 'vue-router'
+import type { RouteLocationRaw } from 'vue-router'
 import { ChevronDown } from '@lucide/vue'
 import { cn } from '@/utils/cn'
 
+export interface MegaMenuLink {
+  label: string
+  to?: RouteLocationRaw
+  href?: string
+  icon?: Component
+  description?: string
+}
+
+export interface MegaMenuGroup {
+  title?: string
+  links: MegaMenuLink[]
+}
+
+export interface MegaMenuItem {
+  id?: string | number
+  label: string
+  to?: RouteLocationRaw
+  icon?: Component
+  active?: boolean
+  groups?: MegaMenuGroup[]
+}
+
 const props = defineProps({
-  items: { type: Array, default: () => [] },
+  items: { type: Array as PropType<MegaMenuItem[]>, default: () => [] },
   ariaLabel: { type: String, default: 'Mega menu' },
   openOnHover: { type: Boolean, default: true },
 })
 
 const activeIndex = ref(-1)
-const root = ref(null)
+const root = ref<HTMLElement | null>(null)
 
 const isOpen = computed(() => activeIndex.value >= 0)
-const activeItem = computed(() => props.items[activeIndex.value] || null)
+const activeItem = computed<MegaMenuItem | null>(() => props.items[activeIndex.value] ?? null)
 
-function toggle(index) {
+function toggle(index: number): void {
   activeIndex.value = activeIndex.value === index ? -1 : index
 }
 
-function open(index) {
+function open(index: number): void {
   activeIndex.value = index
 }
 
-function close() {
+function close(): void {
   activeIndex.value = -1
 }
 
-function onPointerEnter(index) {
+function onPointerEnter(index: number): void {
   if (props.openOnHover) open(index)
 }
 
-function onPointerLeave(event) {
+function onPointerLeave(event: MouseEvent): void {
   if (!props.openOnHover) return
-  if (!root.value?.contains(event.relatedTarget)) close()
+  if (!root.value?.contains(event.relatedTarget as Node | null)) close()
 }
 
-function onDocumentPointerDown(event) {
-  if (!root.value?.contains(event.target)) close()
+function onDocumentPointerDown(event: PointerEvent): void {
+  if (!root.value?.contains(event.target as Node)) close()
 }
 
-function onKeydown(event) {
+function onKeydown(event: KeyboardEvent): void {
   if (event.key === 'Escape' && isOpen.value) {
     event.preventDefault()
     close()
-    root.value?.querySelector('[data-mega-trigger][aria-expanded="true"]')?.focus()
+    root.value?.querySelector<HTMLElement>('[data-mega-trigger][aria-expanded="true"]')?.focus()
   }
   if (event.key === 'ArrowDown' && activeIndex.value === -1) {
     event.preventDefault()
     open(0)
-    nextTick(() => root.value?.querySelector('[data-mega-panel] a, [data-mega-panel] button')?.focus())
+    nextTick(() =>
+      root.value
+        ?.querySelector<HTMLElement>('[data-mega-panel] a, [data-mega-panel] button')
+        ?.focus(),
+    )
   }
 }
 

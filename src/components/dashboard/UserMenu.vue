@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { LogOut, Palette, Settings, UserRound } from '@lucide/vue'
 import DzDropdown from '@/components/ui/actions/DzDropdown.vue'
 import DzAvatar from '@/components/ui/data-display/DzAvatar.vue'

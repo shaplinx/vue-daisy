@@ -1,11 +1,22 @@
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue'
+import type { Component, PropType } from 'vue'
 import { Circle } from '@lucide/vue'
 import { cn } from '@/utils/cn'
 import { modifier, COLORS } from '@/utils/daisy'
 
+export interface TimelineItem {
+  id?: string | number
+  date?: string
+  title?: string
+  description?: string
+  icon?: Component
+  color?: string
+  [key: string]: unknown
+}
+
 const props = defineProps({
-  items: { type: Array, default: () => [] },
+  items: { type: Array as PropType<TimelineItem[]>, default: () => [] },
   horizontal: { type: Boolean, default: false },
   compact: { type: Boolean, default: false },
   snapIcon: { type: Boolean, default: false },

@@ -1,10 +1,11 @@
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue'
+import type { PropType } from 'vue'
 import { cn } from '@/utils/cn'
 import { modifier, COLORS } from '@/utils/daisy'
 
 const props = defineProps({
-  orientation: { type: String, default: 'horizontal' },
+  orientation: { type: String as PropType<'horizontal' | 'vertical'>, default: 'horizontal' },
   color: { type: String, default: 'default' },
   position: { type: String, default: 'start' },
   text: { type: String, default: '' },

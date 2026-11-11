@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import { Heart, Volume2, VolumeX } from '@lucide/vue'
 import { useDemoMode } from '@/showcase/useDemoMode'

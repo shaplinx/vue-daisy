@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue'
 import { cn } from '@/utils/cn'
 import { modifier, SIZES } from '@/utils/daisy'

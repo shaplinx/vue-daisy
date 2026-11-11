@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue'
 import { cn } from '@/utils/cn'
 import { modifier, COLORS, SIZES } from '@/utils/daisy'
@@ -19,7 +19,7 @@ const classes = computed(() => cn('rating', modifier('rating', props.size, SIZES
 
 const starColor = computed(() => modifier('bg', props.color, COLORS))
 
-function select(star) {
+function select(star: number): void {
   if (props.readonly) return
   const next = props.allowClear && props.modelValue === star ? 0 : star
   emit('update:modelValue', next)

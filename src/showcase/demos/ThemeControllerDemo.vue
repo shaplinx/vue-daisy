@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { computed, ref } from 'vue'
 import { Moon, Sun } from '@lucide/vue'
 import { useTheme } from '@/composables/useTheme'

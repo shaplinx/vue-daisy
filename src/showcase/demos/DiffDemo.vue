@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { diffAfter, diffBefore, gradientC, gradientF } from '@/showcase/demoAssets'
 import { useDemoMode } from '@/showcase/useDemoMode'
 

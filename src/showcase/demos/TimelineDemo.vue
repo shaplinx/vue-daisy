@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { Check, Rocket, Sparkles, Truck } from '@lucide/vue'
 import { useDemoMode } from '@/showcase/useDemoMode'
 

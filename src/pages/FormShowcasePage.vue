@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { ArrowRight, CheckCircle2, ClipboardList, Layers, ShieldCheck } from '@lucide/vue'
 
 const patterns = [

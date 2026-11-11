@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { computed, nextTick, onMounted, ref } from 'vue'
 import { cn } from '@/utils/cn'
 import { modifier, COLORS, SIZES } from '@/utils/daisy'
@@ -15,9 +15,13 @@ const props = defineProps({
   name: { type: String, default: 'otp' },
 })
 
-const emit = defineEmits(['update:modelValue', 'change', 'complete'])
+const emit = defineEmits<{
+  'update:modelValue': [value: string]
+  change: [value: string]
+  complete: [value: string]
+}>()
 
-const input = ref(null)
+const input = ref<HTMLInputElement | null>(null)
 
 const classes = computed(() =>
   cn(
@@ -28,9 +32,10 @@ const classes = computed(() =>
   ),
 )
 
-function onInput(event) {
-  const value = event.target.value.replace(/\D/g, '').slice(0, props.length)
-  event.target.value = value
+function onInput(event: Event): void {
+  const target = event.target as HTMLInputElement
+  const value = target.value.replace(/\D/g, '').slice(0, props.length)
+  target.value = value
   emit('update:modelValue', value)
   emit('change', value)
   if (value.length === props.length) emit('complete', value)

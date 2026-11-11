@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import { useDemoMode } from '@/showcase/useDemoMode'
 
@@ -9,7 +9,7 @@ const age = ref('')
 const website = ref('')
 const valid = ref(true)
 
-function onValidity(value) {
+function onValidity(value: boolean) {
   valid.value = value
 }
 </script>

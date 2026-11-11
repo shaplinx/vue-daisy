@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { computed, ref } from 'vue'
 import { Search } from '@lucide/vue'
 import { useDemoMode } from '@/showcase/useDemoMode'
@@ -29,8 +29,9 @@ const filteredRows = computed(() => {
   return rows.filter((row) => `${row.name} ${row.role} ${row.status}`.toLowerCase().includes(query))
 })
 
-function badgeColor(status) {
-  return { Active: 'success', Invited: 'warning', Suspended: 'error' }[status] || 'ghost'
+function badgeColor(status: string) {
+  const colors: Record<string, string> = { Active: 'success', Invited: 'warning', Suspended: 'error' }
+  return colors[status] || 'ghost'
 }
 </script>
 

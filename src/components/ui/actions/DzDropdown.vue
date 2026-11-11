@@ -1,5 +1,7 @@
-<script setup>
+<script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, ref, useId, useSlots, watch } from 'vue'
+import type { PropType } from 'vue'
+import type { ClassValue } from '@/utils/cn'
 import { cn } from '@/utils/cn'
 
 const props = defineProps({
@@ -9,13 +11,18 @@ const props = defineProps({
   closeOnSelect: { type: Boolean, default: true },
   closeOnOutsideClick: { type: Boolean, default: true },
   disabled: { type: Boolean, default: false },
-  contentClass: { type: [String, Array, Object], default: '' },
+  contentClass: { type: [String, Array, Object] as PropType<ClassValue>, default: '' },
 })
 
-const emit = defineEmits(['update:modelValue', 'open', 'close', 'select'])
+const emit = defineEmits<{
+  'update:modelValue': [value: boolean]
+  open: []
+  close: []
+  select: [event: Event]
+}>()
 
-const root = ref(null)
-const content = ref(null)
+const root = ref<HTMLElement | null>(null)
+const content = ref<HTMLElement | null>(null)
 const internalOpen = ref(false)
 const menuId = `dropdown-${useId()}`
 const slots = useSlots()
@@ -30,51 +37,52 @@ const placementClass = computed(() => {
   return allowed.includes(props.placement) ? `dropdown-${props.placement}` : 'dropdown-end'
 })
 
-function setOpen(value) {
+function setOpen(value: boolean): void {
   if (props.disabled) return
   if (!isControlled.value) internalOpen.value = value
   emit('update:modelValue', value)
-  emit(value ? 'open' : 'close')
+  if (value) emit('open')
+  else emit('close')
   if (value) nextTick(() => focusFirstItem())
 }
 
-function toggle() {
+function toggle(): void {
   setOpen(!isOpen.value)
 }
 
-function close() {
+function close(): void {
   if (isOpen.value) setOpen(false)
 }
 
-function focusableItems() {
+function focusableItems(): HTMLElement[] {
   if (!content.value) return []
   return Array.from(
-    content.value.querySelectorAll(
+    content.value.querySelectorAll<HTMLElement>(
       '[role="menuitem"]:not([disabled]), a[href]:not([aria-disabled="true"]), button:not([disabled])',
     ),
   )
 }
 
-function focusFirstItem() {
+function focusFirstItem(): void {
   const items = focusableItems()
   items[0]?.focus()
 }
 
-function focusItem(index) {
+function focusItem(index: number): void {
   const items = focusableItems()
   if (!items.length) return
   const next = (index + items.length) % items.length
   items[next]?.focus()
 }
 
-function onTriggerClick() {
+function onTriggerClick(): void {
   // Custom trigger slots receive `toggle` and wire it themselves; the click
   // would otherwise bubble here and toggle a second time.
   if (hasTriggerSlot.value) return
   toggle()
 }
 
-function onTriggerKeydown(event) {
+function onTriggerKeydown(event: KeyboardEvent): void {
   if (props.disabled) return
   if (event.key === 'ArrowDown') {
     event.preventDefault()
@@ -82,15 +90,15 @@ function onTriggerKeydown(event) {
   }
 }
 
-function onMenuKeydown(event) {
+function onMenuKeydown(event: KeyboardEvent): void {
   const items = focusableItems()
-  const current = items.indexOf(document.activeElement)
+  const current = items.indexOf(document.activeElement as HTMLElement)
 
   switch (event.key) {
     case 'Escape':
       event.preventDefault()
       close()
-      root.value?.querySelector('[data-dropdown-trigger]')?.focus()
+      root.value?.querySelector<HTMLElement>('[data-dropdown-trigger]')?.focus()
       break
     case 'ArrowDown':
       event.preventDefault()
@@ -116,27 +124,28 @@ function onMenuKeydown(event) {
   }
 }
 
-function onContentClick(event) {
-  if (props.closeOnSelect && event.target.closest('[role="menuitem"], a, button')) {
+function onContentClick(event: Event): void {
+  const target = event.target as HTMLElement
+  if (props.closeOnSelect && target.closest('[role="menuitem"], a, button')) {
     emit('select', event)
     close()
   }
 }
 
-function onDocumentPointerDown(event) {
+function onDocumentPointerDown(event: PointerEvent): void {
   if (!props.closeOnOutsideClick || !isOpen.value) return
-  if (!root.value?.contains(event.target)) close()
+  if (!root.value?.contains(event.target as Node)) close()
 }
 
-function onDocumentKeydown(event) {
+function onDocumentKeydown(event: KeyboardEvent): void {
   if (event.key === 'Escape' && isOpen.value) close()
 }
 
-function onMouseEnter() {
+function onMouseEnter(): void {
   if (props.trigger === 'hover') setOpen(true)
 }
 
-function onMouseLeave() {
+function onMouseLeave(): void {
   if (props.trigger === 'hover') close()
 }
 

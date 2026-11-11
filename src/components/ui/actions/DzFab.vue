@@ -1,13 +1,22 @@
-<script setup>
+<script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue'
+import type { Component, PropType } from 'vue'
 import { Plus, X } from '@lucide/vue'
 import { cn } from '@/utils/cn'
 import { modifier, COLORS, SIZES } from '@/utils/daisy'
 
+export interface FabAction {
+  id?: string | number
+  label: string
+  icon?: Component
+  color?: string
+  [key: string]: unknown
+}
+
 const props = defineProps({
   modelValue: { type: Boolean, default: undefined },
-  items: { type: Array, default: () => [] },
-  icon: { type: [Object, Function], default: null },
+  items: { type: Array as PropType<FabAction[]>, default: () => [] },
+  icon: { type: [Object, Function] as PropType<Component | null>, default: null },
   color: { type: String, default: 'primary' },
   size: { type: String, default: 'lg' },
   flower: { type: Boolean, default: false },
@@ -16,9 +25,14 @@ const props = defineProps({
   itemSize: { type: String, default: 'lg' },
 })
 
-const emit = defineEmits(['update:modelValue', 'action', 'open', 'close'])
+const emit = defineEmits<{
+  'update:modelValue': [value: boolean]
+  action: [payload: { item: FabAction; index: number; event: MouseEvent }]
+  open: []
+  close: []
+}>()
 
-const trigger = ref(null)
+const trigger = ref<HTMLElement | null>(null)
 const internalOpen = ref(false)
 const isControlled = computed(() => props.modelValue !== undefined)
 const isOpen = computed(() => (isControlled.value ? props.modelValue : internalOpen.value))
@@ -37,20 +51,21 @@ const mainClass = computed(() =>
   ),
 )
 
-function setOpen(value) {
+function setOpen(value: boolean): void {
   if (!isControlled.value) internalOpen.value = value
   emit('update:modelValue', value)
-  emit(value ? 'open' : 'close')
+  if (value) emit('open')
+  else emit('close')
 }
 
-function toggle() {
+function toggle(): void {
   setOpen(!isOpen.value)
   nextTick(() => {
     if (!isOpen.value) trigger.value?.blur()
   })
 }
 
-function onAction(item, index, event) {
+function onAction(item: FabAction, index: number, event: MouseEvent): void {
   emit('action', { item, index, event })
   if (props.closeOnAction) {
     setOpen(false)
@@ -58,8 +73,11 @@ function onAction(item, index, event) {
   }
 }
 
-function onFocusOut(event) {
-  if (!event.currentTarget.contains(event.relatedTarget)) setOpen(false)
+function onFocusOut(event: FocusEvent): void {
+  const currentTarget = event.currentTarget
+  if (!(currentTarget instanceof Node) || !currentTarget.contains(event.relatedTarget as Node | null)) {
+    setOpen(false)
+  }
 }
 
 watch(

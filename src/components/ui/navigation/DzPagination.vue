@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue'
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from '@lucide/vue'
 import { cn } from '@/utils/cn'
@@ -21,12 +21,12 @@ const emit = defineEmits(['update:modelValue', 'change', 'page-change'])
 
 const current = computed(() => Math.min(Math.max(1, props.modelValue), Math.max(1, props.totalPages)))
 
-const pages = computed(() => {
+const pages = computed<Array<number | string>>(() => {
   const total = Math.max(1, props.totalPages)
   const sibling = Math.max(0, props.siblingCount)
   const start = Math.max(2, current.value - sibling)
   const end = Math.min(total - 1, current.value + sibling)
-  const result = [1]
+  const result: Array<number | string> = [1]
 
   if (start > 2) result.push('start-ellipsis')
   for (let page = start; page <= end; page += 1) result.push(page)
@@ -40,7 +40,7 @@ const classes = computed(() => cn('join', modifier('join', props.size, SIZES)))
 const canPrev = computed(() => current.value > 1 && !props.disabled)
 const canNext = computed(() => current.value < props.totalPages && !props.disabled)
 
-function goTo(page) {
+function goTo(page: number): void {
   if (props.disabled) return
   const next = Math.min(Math.max(1, page), Math.max(1, props.totalPages))
   if (next === current.value) return

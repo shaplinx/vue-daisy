@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { UserRound } from '@lucide/vue'
 import { cn } from '@/utils/cn'

@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { ArrowLeft, SearchX } from '@lucide/vue'
 </script>
 

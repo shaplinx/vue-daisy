@@ -1,10 +1,17 @@
+/** Values accepted by the class-name joiner. */
+export type ClassValue =
+  | string
+  | false
+  | null
+  | undefined
+  | ClassValue[]
+  | Record<string, boolean | null | undefined>
+
 /**
  * Join class names, ignoring falsy values.
- * @param {...(string|false|null|undefined|Record<string, boolean>)} values
- * @returns {string}
  */
-export function cn(...values) {
-  const classes = []
+export function cn(...values: ClassValue[]): string {
+  const classes: string[] = []
   for (const value of values) {
     if (!value) continue
     if (typeof value === 'string') {

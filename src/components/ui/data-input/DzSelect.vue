@@ -1,13 +1,23 @@
-<script setup>
+<script setup lang="ts">
 import { computed, useAttrs } from 'vue'
+import type { PropType } from 'vue'
 import { cn } from '@/utils/cn'
 import { modifier, COLORS, SIZES } from '@/utils/daisy'
 
 defineOptions({ inheritAttrs: false })
 
+export interface SelectOption {
+  label: string
+  value: string | number
+  disabled?: boolean
+  group?: string
+}
+
+export type SelectValue = string | number | Array<string | number>
+
 const props = defineProps({
-  modelValue: { type: [String, Number, Array], default: '' },
-  options: { type: Array, default: () => [] },
+  modelValue: { type: [String, Number, Array] as PropType<SelectValue>, default: '' },
+  options: { type: Array as PropType<SelectOption[]>, default: () => [] },
   placeholder: { type: String, default: '' },
   size: { type: String, default: 'md' },
   color: { type: String, default: 'default' },
@@ -19,7 +29,12 @@ const props = defineProps({
   ariaLabel: { type: String, default: 'Select an option' },
 })
 
-const emit = defineEmits(['update:modelValue', 'change', 'focus', 'blur'])
+const emit = defineEmits<{
+  'update:modelValue': [value: SelectValue]
+  change: [event: Event]
+  focus: [event: FocusEvent]
+  blur: [event: FocusEvent]
+}>()
 const attrs = useAttrs()
 
 const classes = computed(() =>
@@ -35,20 +50,28 @@ const classes = computed(() =>
   ),
 )
 
-const groups = computed(() => {
-  const grouped = new Map()
+const groups = computed<Array<{ label: string; options: SelectOption[] }>>(() => {
+  const grouped = new Map<string, SelectOption[]>()
   for (const option of props.options) {
-    const group = option.group || ''
+    const group = option.group ?? ''
     if (!grouped.has(group)) grouped.set(group, [])
-    grouped.get(group).push(option)
+    grouped.get(group)?.push(option)
   }
   return Array.from(grouped.entries()).map(([label, options]) => ({ label, options }))
 })
 
-function onChange(event) {
-  const value = props.multiple
-    ? Array.from(event.target.selectedOptions).map((option) => option.value)
-    : event.target.value
+function isSelected(value: string | number): boolean {
+  if (props.multiple) {
+    return Array.isArray(props.modelValue) && props.modelValue.includes(value)
+  }
+  return props.modelValue === value
+}
+
+function onChange(event: Event): void {
+  const target = event.target as HTMLSelectElement
+  const value: SelectValue = props.multiple
+    ? Array.from(target.selectedOptions).map((option) => option.value)
+    : target.value
   emit('update:modelValue', value)
   emit('change', event)
 }
@@ -75,7 +98,7 @@ function onChange(event) {
           :key="option.value"
           :value="option.value"
           :disabled="option.disabled"
-          :selected="multiple ? modelValue.includes(option.value) : modelValue === option.value"
+          :selected="isSelected(option.value)"
         >
           {{ option.label }}
         </option>
@@ -86,7 +109,7 @@ function onChange(event) {
           :key="option.value"
           :value="option.value"
           :disabled="option.disabled"
-          :selected="multiple ? modelValue.includes(option.value) : modelValue === option.value"
+          :selected="isSelected(option.value)"
         >
           {{ option.label }}
         </option>

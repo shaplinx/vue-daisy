@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import { FileText, Folder, Image, Music, Trash2, Users } from '@lucide/vue'
 import { useToast } from '@/composables/useToast'
@@ -14,7 +14,7 @@ const items = ref([
   { id: 4, icon: Music, title: 'notification.mp3', description: '0:04 · 96 kbps' },
 ])
 
-function remove(item) {
+function remove(item: { id: number; title: string }) {
   items.value = items.value.filter((entry) => entry.id !== item.id)
   toast.info(`Removed ${item.title}`)
 }

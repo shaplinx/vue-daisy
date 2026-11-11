@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import { CreditCard, Package, ShieldCheck, Truck } from '@lucide/vue'
 import { useDemoMode } from '@/showcase/useDemoMode'

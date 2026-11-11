@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { ChevronLeft, ChevronRight, Search } from '@lucide/vue'
 import { useDemoMode } from '@/showcase/useDemoMode'
 

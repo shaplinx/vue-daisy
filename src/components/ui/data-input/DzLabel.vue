@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 const props = defineProps({
   text: { type: String, default: '' },
   htmlFor: { type: String, default: undefined },

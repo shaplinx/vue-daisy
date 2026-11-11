@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { computed, ref, useAttrs } from 'vue'
 import { X } from '@lucide/vue'
 import { cn } from '@/utils/cn'
@@ -22,9 +22,17 @@ const props = defineProps({
   ariaLabel: { type: String, default: '' },
 })
 
-const emit = defineEmits(['update:modelValue', 'input', 'change', 'focus', 'blur', 'clear', 'enter'])
+const emit = defineEmits<{
+  'update:modelValue': [value: string | number]
+  input: [event: Event]
+  change: [event: Event]
+  focus: [event: FocusEvent]
+  blur: [event: FocusEvent]
+  clear: []
+  enter: [event: KeyboardEvent]
+}>()
 const attrs = useAttrs()
-const input = ref(null)
+const input = ref<HTMLInputElement | null>(null)
 
 // `class` styles the visual wrapper; every other attribute belongs on the input.
 const inputAttrs = computed(() => {
@@ -45,18 +53,19 @@ const classes = computed(() =>
   ),
 )
 
-function onInput(event) {
-  emit('update:modelValue', event.target.value)
+function onInput(event: Event): void {
+  const target = event.target as HTMLInputElement
+  emit('update:modelValue', target.value)
   emit('input', event)
 }
 
-function clear() {
+function clear(): void {
   emit('update:modelValue', '')
   emit('clear')
   input.value?.focus()
 }
 
-function onKeydown(event) {
+function onKeydown(event: KeyboardEvent): void {
   if (event.key === 'Enter') emit('enter', event)
 }
 

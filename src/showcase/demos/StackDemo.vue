@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { gradientA, gradientB, gradientC } from '@/showcase/demoAssets'
 import { useDemoMode } from '@/showcase/useDemoMode'
 

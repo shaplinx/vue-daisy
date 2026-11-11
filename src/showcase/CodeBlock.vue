@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue'
 import { Check, Copy } from '@lucide/vue'
 import { useClipboard } from '@/composables/useClipboard'

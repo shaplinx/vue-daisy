@@ -1,13 +1,24 @@
 import { onScopeDispose, ref } from 'vue'
+import type { Ref } from 'vue'
+
+export interface UseClipboardOptions {
+  /** How long the `copied` flag stays true, in milliseconds. */
+  timeout?: number
+}
+
+export interface UseClipboardReturn {
+  copied: Readonly<Ref<boolean>>
+  copy: (text: string) => Promise<boolean>
+}
 
 /**
  * Copy text to the clipboard with a legacy fallback and transient feedback.
  */
-export function useClipboard({ timeout = 1600 } = {}) {
+export function useClipboard({ timeout = 1600 }: UseClipboardOptions = {}): UseClipboardReturn {
   const copied = ref(false)
-  let timer
+  let timer: ReturnType<typeof setTimeout> | undefined
 
-  async function copy(text) {
+  async function copy(text: string): Promise<boolean> {
     try {
       if (navigator.clipboard?.writeText) {
         await navigator.clipboard.writeText(text)

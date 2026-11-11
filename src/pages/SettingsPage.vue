@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { computed, ref } from 'vue'
 import { Bell, Check, Info, Palette, RotateCcw, SunMoon } from '@lucide/vue'
 import { useTheme } from '@/composables/useTheme'

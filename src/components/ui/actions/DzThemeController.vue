@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue'
 import { Moon, Sun } from '@lucide/vue'
 import { cn } from '@/utils/cn'
@@ -34,8 +34,8 @@ const classes = computed(() =>
   ),
 )
 
-function onChange(event) {
-  const checked = event.target.checked
+function onChange(event: Event): void {
+  const checked = (event.target as HTMLInputElement).checked
   const theme = checked ? props.darkTheme : props.lightTheme
   emit('update:modelValue', checked)
   emit('change', isToggle.value ? theme : theme, checked)

@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { computed, ref, useId } from 'vue'
 import { cn } from '@/utils/cn'
 import { modifier, COLORS, SIZES } from '@/utils/daisy'
@@ -23,7 +23,7 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue', 'input', 'validity'])
 const uid = useId()
-const input = ref(null)
+const input = ref<HTMLInputElement | null>(null)
 
 const classes = computed(() =>
   cn(
@@ -33,10 +33,10 @@ const classes = computed(() =>
   ),
 )
 
-function onInput(event) {
-  emit('update:modelValue', event.target.value)
+function onInput(event: Event): void {
+  emit('update:modelValue', (event.target as HTMLInputElement).value)
   emit('input', event)
-  emit('validity', event.target.checkValidity())
+  emit('validity', (event.target as HTMLInputElement).checkValidity())
 }
 
 defineExpose({ validate: () => input.value?.checkValidity() ?? false, input })

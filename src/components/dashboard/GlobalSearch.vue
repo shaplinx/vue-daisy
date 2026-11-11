@@ -1,6 +1,8 @@
-<script setup>
+<script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import type { Component as VueComponent } from 'vue'
 import { useRouter } from 'vue-router'
+import type { RouteLocationRaw } from 'vue-router'
 import {
   ArrowRight,
   Blocks,
@@ -16,12 +18,22 @@ import {
 } from '@lucide/vue'
 import { components, componentCategories } from '@/data/componentRegistry'
 
+interface SearchResult {
+  label: string
+  description: string
+  to: RouteLocationRaw
+  icon: VueComponent
+  type: string
+  group: string
+  keywords?: string
+}
+
 const router = useRouter()
 
 const open = ref(false)
 const query = ref('')
 const activeIndex = ref(0)
-const input = ref(null)
+const input = ref<HTMLInputElement | null>(null)
 
 const pages = [
   { label: 'Dashboard', description: 'Project overview and activity', to: '/dashboard', icon: LayoutDashboard, keywords: 'home overview' },
@@ -36,13 +48,13 @@ const categoryLabel = computed(() =>
   Object.fromEntries(componentCategories.map((category) => [category.id, category.label])),
 )
 
-const results = computed(() => {
+const results = computed<SearchResult[]>(() => {
   const q = query.value.trim().toLowerCase()
-  const pageResults = pages
+  const pageResults: SearchResult[] = pages
     .filter((page) => !q || `${page.label} ${page.description} ${page.keywords}`.toLowerCase().includes(q))
     .map((page) => ({ ...page, type: 'Page', group: 'Pages' }))
 
-  const componentResults = components
+  const componentResults: SearchResult[] = components
     .filter((item) => {
       if (!q) return false
       return `${item.name} ${item.id} ${item.description} ${categoryLabel.value[item.category] || ''}`
@@ -63,11 +75,11 @@ const results = computed(() => {
   return [...pageResults, ...componentResults].slice(0, 12)
 })
 
-const groupedResults = computed(() => {
-  const groups = new Map()
+const groupedResults = computed<Array<{ label: string; items: SearchResult[] }>>(() => {
+  const groups = new Map<string, SearchResult[]>()
   for (const result of results.value) {
     if (!groups.has(result.group)) groups.set(result.group, [])
-    groups.get(result.group).push(result)
+    groups.get(result.group)?.push(result)
   }
   return Array.from(groups.entries()).map(([label, items]) => ({ label, items }))
 })
@@ -94,13 +106,13 @@ function close() {
   open.value = false
 }
 
-function choose(result) {
+function choose(result: SearchResult | undefined): void {
   if (!result) return
   router.push(result.to)
   close()
 }
 
-function onKeydown(event) {
+function onKeydown(event: KeyboardEvent): void {
   if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
     event.preventDefault()
     open.value ? close() : show()
@@ -124,7 +136,7 @@ function onKeydown(event) {
   }
 }
 
-function onOverlayClick(event) {
+function onOverlayClick(event: MouseEvent): void {
   if (event.target === event.currentTarget) close()
 }
 

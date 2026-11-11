@@ -1,10 +1,11 @@
-<script setup>
+<script setup lang="ts">
 import { Blocks, BookOpen, Compass, Layers, LifeBuoy, Palette, Settings, Sparkles } from '@lucide/vue'
 import { useDemoMode } from '@/showcase/useDemoMode'
+import type { MegaMenuItem } from '@/components/ui/navigation/DzMegamenu.vue'
 
 const mode = useDemoMode()
 
-const items = [
+const items: MegaMenuItem[] = [
   { id: 'library', label: 'Library', icon: Layers },
   {
     id: 'components',
@@ -52,7 +53,7 @@ const items = [
     </div>
     <div>
       <p class="mb-2 text-xs font-semibold uppercase tracking-widest opacity-50">Single group</p>
-      <DzMegamenu :items="[items[0], { ...items[1], groups: items[1].groups.slice(0, 1) }]" />
+      <DzMegamenu :items="[items[0], { ...items[1], groups: (items[1].groups ?? []).slice(0, 1) }]" />
     </div>
   </div>
 </template>

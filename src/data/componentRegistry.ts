@@ -7,8 +7,46 @@ import {
   PanelLeft,
   TextCursorInput,
 } from '@lucide/vue'
+import type { Component } from 'vue'
 
-export const componentCategories = [
+export interface ComponentCategory {
+  id: string
+  label: string
+  icon: Component
+  description: string
+}
+
+export interface RegistryProp {
+  name: string
+  type: string
+  default: string
+  description: string
+}
+
+export interface RegistryEvent {
+  name: string
+  payload: string
+  description: string
+}
+
+export interface RegistrySlot {
+  name: string
+  description: string
+}
+
+export interface RegistryComponent {
+  id: string
+  name: string
+  category: string
+  demo: string
+  description: string
+  props: RegistryProp[]
+  events: RegistryEvent[]
+  slots: RegistrySlot[]
+  source: string
+}
+
+export const componentCategories: ComponentCategory[] = [
   {
     id: 'actions',
     label: 'Actions',
@@ -53,16 +91,25 @@ export const componentCategories = [
   },
 ]
 
-const p = (name, type, defaultValue, description) => ({
+const p = (
+  name: string,
+  type: string,
+  defaultValue: string,
+  description: string,
+): RegistryProp => ({
   name,
   type,
   default: defaultValue,
   description,
 })
-const e = (name, payload, description) => ({ name, payload, description })
-const s = (name, description) => ({ name, description })
+const e = (name: string, payload: string, description: string): RegistryEvent => ({
+  name,
+  payload,
+  description,
+})
+const s = (name: string, description: string): RegistrySlot => ({ name, description })
 
-export const components = [
+export const components: RegistryComponent[] = [
   {
     id: 'button',
     name: 'Button',
@@ -1353,8 +1400,10 @@ toast.success('Saved successfully', { title: 'Success' })`,
   },
 ]
 
-export const componentsById = Object.fromEntries(components.map((component) => [component.id, component]))
+export const componentsById: Record<string, RegistryComponent> = Object.fromEntries(
+  components.map((component) => [component.id, component]),
+)
 
-export function componentsByCategory(categoryId) {
+export function componentsByCategory(categoryId: string): RegistryComponent[] {
   return components.filter((component) => component.category === categoryId)
 }

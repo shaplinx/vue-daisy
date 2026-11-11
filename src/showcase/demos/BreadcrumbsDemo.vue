@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { Home, Layers, Settings, Slash } from '@lucide/vue'
 import { useDemoMode } from '@/showcase/useDemoMode'
 

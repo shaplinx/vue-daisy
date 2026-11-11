@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue'
 import { cn } from '@/utils/cn'
 import { modifier, COLORS, SIZES } from '@/utils/daisy'
@@ -22,14 +22,14 @@ const classes = computed(() =>
   cn('range', modifier('range', props.size, SIZES), modifier('range', props.color, COLORS)),
 )
 
-function onInput(event) {
-  const value = Number(event.target.value)
+function onInput(event: Event): void {
+  const value = Number((event.target as HTMLInputElement).value)
   emit('update:modelValue', value)
   emit('input', value)
 }
 
-function onChange(event) {
-  emit('change', Number(event.target.value))
+function onChange(event: Event): void {
+  emit('change', Number((event.target as HTMLInputElement).value))
 }
 </script>
 

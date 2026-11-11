@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import { AtSign, Mail, Search, User } from '@lucide/vue'
 import { useDemoMode } from '@/showcase/useDemoMode'

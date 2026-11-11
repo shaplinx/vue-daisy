@@ -1,10 +1,18 @@
-<script setup>
+<script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import type { PropType } from 'vue'
 import { ChevronLeft, ChevronRight } from '@lucide/vue'
 import { cn } from '@/utils/cn'
 
+export interface CarouselItem {
+  id?: string | number
+  src?: string
+  alt?: string
+  [key: string]: unknown
+}
+
 const props = defineProps({
-  items: { type: Array, default: () => [] },
+  items: { type: Array as PropType<CarouselItem[]>, default: () => [] },
   modelValue: { type: Number, default: 0 },
   vertical: { type: Boolean, default: false },
   showControls: { type: Boolean, default: true },
@@ -15,9 +23,12 @@ const props = defineProps({
   ariaLabel: { type: String, default: 'Carousel' },
 })
 
-const emit = defineEmits(['update:modelValue', 'change'])
+const emit = defineEmits<{
+  'update:modelValue': [index: number]
+  change: [index: number]
+}>()
 
-const track = ref(null)
+const track = ref<HTMLElement | null>(null)
 const active = ref(props.modelValue)
 
 const rootClass = computed(() =>
@@ -26,22 +37,22 @@ const rootClass = computed(() =>
   }),
 )
 
-function slides() {
+function slides(): Element[] {
   return track.value ? Array.from(track.value.children) : []
 }
 
-function goTo(index) {
+function goTo(index: number): void {
   const children = slides()
   if (!children.length) return
   const total = children.length
-  let next = index
+  let next: number
   if (props.loop) next = (index + total) % total
   else next = Math.min(Math.max(index, 0), total - 1)
 
   const child = children[next]
   child?.scrollIntoView({
     behavior: 'smooth',
-    block: props.vertical ? 'nearest' : 'nearest',
+    block: 'nearest',
     inline: props.vertical ? 'nearest' : 'center',
   })
   active.value = next
@@ -49,15 +60,15 @@ function goTo(index) {
   emit('change', next)
 }
 
-function next() {
+function next(): void {
   goTo(active.value + 1)
 }
 
-function prev() {
+function prev(): void {
   goTo(active.value - 1)
 }
 
-function onScroll() {
+function onScroll(): void {
   const children = slides()
   if (!children.length || !track.value) return
   const rect = track.value.getBoundingClientRect()

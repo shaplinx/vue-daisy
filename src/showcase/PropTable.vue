@@ -1,14 +1,32 @@
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue'
+import type { Component, PropType } from 'vue'
 import { Braces, Radio, SlidersHorizontal } from '@lucide/vue'
 
+/** Flat row shape shared by props/events/slots tables. */
+interface RegistryRow {
+  name?: string
+  type?: string
+  default?: string
+  payload?: string
+  description?: string
+}
+
+interface RegistrySection {
+  id: string
+  title: string
+  icon: Component
+  rows: RegistryRow[]
+  columns: Array<{ key: keyof RegistryRow; label: string }>
+}
+
 const props = defineProps({
-  props: { type: Array, default: () => [] },
-  events: { type: Array, default: () => [] },
-  slots: { type: Array, default: () => [] },
+  props: { type: Array as PropType<RegistryRow[]>, default: () => [] },
+  events: { type: Array as PropType<RegistryRow[]>, default: () => [] },
+  slots: { type: Array as PropType<RegistryRow[]>, default: () => [] },
 })
 
-const sections = computed(() => [
+const sections = computed<RegistrySection[]>(() => [
   {
     id: 'props',
     title: 'Props',

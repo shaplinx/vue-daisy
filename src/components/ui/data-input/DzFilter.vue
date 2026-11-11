@@ -1,26 +1,39 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
+import type { Component, PropType } from 'vue'
 import { X } from '@lucide/vue'
 
+export interface FilterItem {
+  label: string
+  value: string | number
+  icon?: Component
+  disabled?: boolean
+}
+
 const props = defineProps({
-  items: { type: Array, default: () => [] },
-  modelValue: { type: [String, Number], default: '' },
+  items: { type: Array as PropType<FilterItem[]>, default: () => [] },
+  modelValue: { type: [String, Number] as PropType<string | number>, default: '' },
   name: { type: String, default: 'filter' },
   showReset: { type: Boolean, default: true },
   resetLabel: { type: String, default: 'Reset filter' },
   ariaLabel: { type: String, default: 'Filter' },
 })
 
-const emit = defineEmits(['update:modelValue', 'change', 'reset'])
+const emit = defineEmits<{
+  'update:modelValue': [value: string | number]
+  change: [value: string | number]
+  reset: []
+}>()
+
 const group = ref(null)
 
-function select(item) {
+function select(item: FilterItem): void {
   if (item.disabled) return
   emit('update:modelValue', item.value)
   emit('change', item.value)
 }
 
-function reset() {
+function reset(): void {
   emit('update:modelValue', '')
   emit('change', '')
   emit('reset')

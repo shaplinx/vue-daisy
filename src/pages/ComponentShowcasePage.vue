@@ -1,15 +1,16 @@
-<script setup>
+<script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { Blocks, LayoutGrid, Search, SlidersHorizontal, X } from '@lucide/vue'
 import ShowcaseCard from '@/showcase/ShowcaseCard.vue'
 import { componentCategories, components } from '@/data/componentRegistry'
+import type { RegistryComponent } from '@/data/componentRegistry'
 
 const route = useRoute()
 const router = useRouter()
 
 const search = ref('')
-const searchInput = ref(null)
+const searchInput = ref<HTMLInputElement | null>(null)
 
 const activeCategory = computed(() => {
   const id = String(route.query.category || 'all')
@@ -38,14 +39,14 @@ const categoryCounts = computed(() =>
   ),
 )
 
-function matchesSearch(component, query) {
+function matchesSearch(component: RegistryComponent, query: string): boolean {
   if (!query) return true
   const haystack = [
     component.name,
     component.id,
     component.description,
     categoryLabel.value[component.category],
-    ...(component.props || []).map((prop) => prop.name),
+    ...(component.props ?? []).map((prop) => prop.name),
   ]
     .join(' ')
     .toLowerCase()
@@ -80,26 +81,26 @@ const resultLabel = computed(() => {
   return `${count} component${count === 1 ? '' : 's'}`
 })
 
-function setCategory(id) {
+function setCategory(id: string): void {
   search.value = ''
   const query = id === 'all' ? {} : { category: id }
   router.push({ path: '/components', query })
 }
 
-function clearFilters() {
+function clearFilters(): void {
   search.value = ''
   router.push({ path: '/components' })
 }
 
-function selectComponent(component) {
-  const query = {}
+function selectComponent(component: RegistryComponent): void {
+  const query: Record<string, string> = {}
   if (activeCategory.value !== 'all') query.category = activeCategory.value
   query.component = component.id
   router.push({ path: '/components', query })
   nextTick(() => document.getElementById(`component-${component.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
 }
 
-function onSearch() {
+function onSearch(): void {
   if (route.query.component) {
     const query = activeCategory.value !== 'all' ? { category: activeCategory.value } : {}
     router.replace({ path: '/components', query })

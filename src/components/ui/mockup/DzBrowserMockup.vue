@@ -1,10 +1,12 @@
-<script setup>
+<script setup lang="ts">
+import type { PropType } from 'vue'
+import type { ClassValue } from '@/utils/cn'
 import { cn } from '@/utils/cn'
 
 const props = defineProps({
   url: { type: String, default: 'https://daisyui.com' },
   bordered: { type: Boolean, default: true },
-  contentClass: { type: [String, Array, Object], default: '' },
+  contentClass: { type: [String, Array, Object] as PropType<ClassValue>, default: '' },
 })
 </script>
 

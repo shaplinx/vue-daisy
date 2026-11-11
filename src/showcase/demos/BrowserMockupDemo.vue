@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import { ArrowRight, Check, Globe, ShieldCheck, Sparkles } from '@lucide/vue'
 import { gradientA, gradientE } from '@/showcase/demoAssets'

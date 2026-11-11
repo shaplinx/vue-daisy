@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue'
 import { cn } from '@/utils/cn'
 import { modifier, COLORS, SIZES } from '@/utils/daisy'
@@ -20,7 +20,7 @@ const classes = computed(() =>
   cn('radio', modifier('radio', props.size, SIZES), modifier('radio', props.color, COLORS)),
 )
 
-function onChange(event) {
+function onChange(event: Event): void {
   emit('update:modelValue', props.value)
   emit('change', event)
 }

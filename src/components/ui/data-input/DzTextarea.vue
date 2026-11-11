@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { computed, useAttrs } from 'vue'
 import { cn } from '@/utils/cn'
 import { modifier, COLORS, SIZES } from '@/utils/daisy'
@@ -41,8 +41,8 @@ const classes = computed(() =>
   ),
 )
 
-function onInput(event) {
-  emit('update:modelValue', event.target.value)
+function onInput(event: Event): void {
+  emit('update:modelValue', (event.target as HTMLInputElement).value)
   emit('input', event)
 }
 </script>

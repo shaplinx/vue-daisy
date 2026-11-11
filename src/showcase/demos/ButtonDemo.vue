@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import { ArrowRight, Download, Plus, Save, Settings, Trash2 } from '@lucide/vue'
 import { useToast } from '@/composables/useToast'

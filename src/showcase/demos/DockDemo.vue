@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import { Bell, Home, Search, Settings, UserRound } from '@lucide/vue'
 import { useDemoMode } from '@/showcase/useDemoMode'

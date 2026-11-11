@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import { Copy, Pencil, Plus, Share2, Trash2 } from '@lucide/vue'
 import { useToast } from '@/composables/useToast'
@@ -16,7 +16,7 @@ const actions = [
   { id: 'delete', label: 'Delete', icon: Trash2, color: 'error' },
 ]
 
-function onAction({ item }) {
+function onAction({ item }: { item: { label: string } }) {
   last.value = item.label
   toast.info(`${item.label} action triggered`)
 }

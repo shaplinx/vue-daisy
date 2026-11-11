@@ -1,11 +1,14 @@
-<script setup>
+<script setup lang="ts">
 import { computed, ref, watch } from 'vue'
+import type { PropType } from 'vue'
 import { cn } from '@/utils/cn'
 import { modifier, COLORS, SIZES } from '@/utils/daisy'
 
+export type CheckboxValue = boolean | Array<string | number | boolean>
+
 const props = defineProps({
-  modelValue: { type: [Boolean, Array], default: false },
-  value: { type: [String, Number, Boolean], default: true },
+  modelValue: { type: [Boolean, Array] as PropType<CheckboxValue>, default: false },
+  value: { type: [String, Number, Boolean] as PropType<string | number | boolean>, default: true },
   indeterminate: { type: Boolean, default: false },
   size: { type: String, default: 'md' },
   color: { type: String, default: 'default' },
@@ -15,27 +18,34 @@ const props = defineProps({
   name: { type: String, default: undefined },
 })
 
-const emit = defineEmits(['update:modelValue', 'change'])
+const emit = defineEmits<{
+  'update:modelValue': [value: CheckboxValue]
+  change: [event: Event]
+}>()
 
-const input = ref(null)
+const input = ref<HTMLInputElement | null>(null)
 
 const isArray = computed(() => Array.isArray(props.modelValue))
 const isChecked = computed(() =>
-  isArray.value ? props.modelValue.includes(props.value) : Boolean(props.modelValue),
+  isArray.value
+    ? (props.modelValue as Array<string | number | boolean>).includes(props.value)
+    : Boolean(props.modelValue),
 )
 
 const classes = computed(() =>
   cn('checkbox', modifier('checkbox', props.size, SIZES), modifier('checkbox', props.color, COLORS)),
 )
 
-function onChange(event) {
+function onChange(event: Event): void {
+  const target = event.target as HTMLInputElement
   if (isArray.value) {
-    const next = event.target.checked
-      ? [...props.modelValue, props.value]
-      : props.modelValue.filter((item) => item !== props.value)
+    const current = props.modelValue as Array<string | number | boolean>
+    const next = target.checked
+      ? [...current, props.value]
+      : current.filter((item) => item !== props.value)
     emit('update:modelValue', next)
   } else {
-    emit('update:modelValue', event.target.checked)
+    emit('update:modelValue', target.checked)
   }
   emit('change', event)
 }

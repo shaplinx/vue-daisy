@@ -1,11 +1,23 @@
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue'
+import type { Component, PropType } from 'vue'
 import { RouterLink } from 'vue-router'
+import type { RouteLocationRaw } from 'vue-router'
 import { cn } from '@/utils/cn'
 import { modifier, SIZES } from '@/utils/daisy'
 
+export interface DockItem {
+  id?: string | number
+  label: string
+  to?: RouteLocationRaw
+  href?: string
+  icon: Component
+  active?: boolean
+  badge?: string | number
+}
+
 const props = defineProps({
-  items: { type: Array, default: () => [] },
+  items: { type: Array as PropType<DockItem[]>, default: () => [] },
   size: { type: String, default: 'md' },
   ariaLabel: { type: String, default: 'Dock navigation' },
 })

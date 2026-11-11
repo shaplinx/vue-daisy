@@ -1,13 +1,13 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import { useToast } from '@/composables/useToast'
 import { useDemoMode } from '@/showcase/useDemoMode'
 
 const mode = useDemoMode()
 const toast = useToast()
-const files = ref([])
+const files = ref<File[]>([])
 
-function onChange({ files: next }) {
+function onChange({ files: next }: { files: File[]; event: Event }) {
   files.value = next
   toast.info(`${next.length} file${next.length === 1 ? '' : 's'} selected`)
 }

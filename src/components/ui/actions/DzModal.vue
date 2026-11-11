@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { X } from '@lucide/vue'
 import { cn } from '@/utils/cn'
@@ -17,9 +17,14 @@ const props = defineProps({
   contentClass: { type: [String, Array, Object], default: '' },
 })
 
-const emit = defineEmits(['update:modelValue', 'close', 'open', 'confirm'])
+const emit = defineEmits<{
+  'update:modelValue': [value: boolean]
+  close: [reason: string]
+  open: []
+  confirm: []
+}>()
 
-const dialog = ref(null)
+const dialog = ref<HTMLDialogElement | null>(null)
 
 const sizeClass = computed(
   () =>
@@ -38,18 +43,18 @@ const positionClass = computed(() =>
     : 'modal-middle',
 )
 
-function open() {
+function open(): void {
   if (!dialog.value || dialog.value.open) return
   dialog.value.showModal()
   emit('open')
 }
 
-function close(reason = 'programmatic') {
+function close(reason = 'programmatic'): void {
   if (!dialog.value?.open) return
   dialog.value.close(reason)
 }
 
-function onCancel(event) {
+function onCancel(event: Event): void {
   if (!props.escClose) {
     event.preventDefault()
     return
@@ -58,13 +63,13 @@ function onCancel(event) {
   emit('close', 'escape')
 }
 
-function onDialogClick(event) {
+function onDialogClick(event: MouseEvent): void {
   if (event.target !== dialog.value) return
   if (!props.backdropClose) return
   close('backdrop')
 }
 
-function onCloseEvent() {
+function onCloseEvent(): void {
   emit('update:modelValue', false)
   emit('close', 'close')
 }

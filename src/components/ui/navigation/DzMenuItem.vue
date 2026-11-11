@@ -1,32 +1,54 @@
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue'
+import type { Component, PropType } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
+import type { RouteLocationPathRaw, RouteLocationRaw } from 'vue-router'
 import { ChevronDown } from '@lucide/vue'
 
+export interface MenuItemData {
+  id?: string | number
+  label: string
+  to?: RouteLocationRaw
+  href?: string
+  icon?: Component
+  badge?: string | number
+  disabled?: boolean
+  divider?: boolean
+  header?: string
+  active?: boolean
+  children?: MenuItemData[]
+}
+
 const props = defineProps({
-  item: { type: Object, required: true },
-  activeId: { type: [String, Number], default: null },
+  item: { type: Object as PropType<MenuItemData>, required: true },
+  activeId: { type: [String, Number] as PropType<string | number | null>, default: null },
   level: { type: Number, default: 0 },
 })
 
-const emit = defineEmits(['select'])
+const emit = defineEmits<{
+  select: [payload: { item: MenuItemData; event: MouseEvent }]
+}>()
 const route = useRoute()
 
-const hasChildren = computed(() => Array.isArray(props.item.children) && props.item.children.length > 0)
+const hasChildren = computed(
+  () => Array.isArray(props.item.children) && (props.item.children?.length ?? 0) > 0,
+)
 
-const childActive = computed(() =>
-  hasChildren.value && props.item.children.some((child) => isActive(child)),
+const childActive = computed(
+  () => hasChildren.value && !!props.item.children?.some((child) => isActive(child)),
 )
 
 const active = computed(() => isActive(props.item))
 
-function isActive(item) {
+function isActive(item: MenuItemData | undefined): boolean {
   if (!item) return false
   if (item.active) return true
   if (props.activeId != null && item.id === props.activeId) return true
   if (item.to && route?.path) {
-    const path = typeof item.to === 'string' ? item.to : item.to.path
-    const query = typeof item.to === 'string' ? {} : item.to.query || {}
+    const raw = item.to
+    const path = typeof raw === 'string' ? raw : (raw as RouteLocationPathRaw).path
+    const query =
+      typeof raw === 'string' ? {} : ((raw as RouteLocationPathRaw).query ?? {})
     if (path && route.path === path) {
       const keys = Object.keys(query)
       if (!keys.length) return !route.query.component && !route.query.category
@@ -36,8 +58,13 @@ function isActive(item) {
   return Array.isArray(item.children) && item.children.some((child) => isActive(child))
 }
 
-function onSelect(event) {
+function onSelect(event: MouseEvent): void {
   emit('select', { item: props.item, event })
+}
+
+/** Forward a nested child selection so the deepest item is reported. */
+function onChildSelect(payload: { item: MenuItemData; event: MouseEvent }): void {
+  emit('select', payload)
 }
 </script>
 
@@ -63,7 +90,7 @@ function onSelect(event) {
           :item="child"
           :active-id="activeId"
           :level="level + 1"
-          @select="onSelect"
+          @select="onChildSelect"
         />
       </ul>
     </details>

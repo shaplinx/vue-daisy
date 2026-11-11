@@ -1,30 +1,47 @@
-<script setup>
+<script setup lang="ts">
 import { computed, nextTick, ref, useId, watch } from 'vue'
+import type { Component, PropType } from 'vue'
+import type { ClassValue } from '@/utils/cn'
 import { cn } from '@/utils/cn'
 import { modifier, SIZES } from '@/utils/daisy'
 
+export interface TabItem {
+  id?: string | number
+  label?: string
+  icon?: Component
+  badge?: string | number
+  disabled?: boolean
+  [key: string]: unknown
+}
+
+export type TabId = string | number
+
 const props = defineProps({
-  tabs: { type: Array, default: () => [] },
-  modelValue: { type: [String, Number], default: undefined },
+  tabs: { type: Array as PropType<TabItem[]>, default: () => [] },
+  modelValue: { type: [String, Number] as PropType<TabId>, default: undefined },
   variant: { type: String, default: 'box' },
   size: { type: String, default: 'md' },
   position: { type: String, default: 'top' },
   grow: { type: Boolean, default: false },
   ariaLabel: { type: String, default: 'Tabs' },
-  panelClass: { type: [String, Array, Object], default: '' },
+  panelClass: { type: [String, Array, Object] as PropType<ClassValue>, default: '' },
 })
 
-const emit = defineEmits(['update:modelValue', 'change'])
-const uid = useId()
-const internal = ref(props.tabs[0]?.id ?? 0)
+const emit = defineEmits<{
+  'update:modelValue': [id: TabId]
+  change: [tab: TabItem]
+}>()
 
-const normalizedTabs = computed(() =>
+const uid = useId()
+const internal = ref<TabId>(props.tabs[0]?.id ?? 0)
+
+const normalizedTabs = computed<(TabItem & { id: TabId })[]>(() =>
   props.tabs.map((tab, index) => ({ id: tab.id ?? index, ...tab })),
 )
 
 const isControlled = computed(() => props.modelValue !== undefined)
 
-const activeId = computed(() => {
+const activeId = computed<TabId | undefined>(() => {
   const candidate = isControlled.value ? props.modelValue : internal.value
   return normalizedTabs.value.some((tab) => tab.id === candidate)
     ? candidate
@@ -46,26 +63,26 @@ const listClass = computed(() =>
   ),
 )
 
-function select(tab) {
+function select(tab: TabItem & { id: TabId }): void {
   if (tab.disabled) return
   if (!isControlled.value) internal.value = tab.id
   emit('update:modelValue', tab.id)
   emit('change', tab)
 }
 
-function tabId(tab) {
+function tabId(tab: TabItem & { id: TabId }): string {
   return `${uid}-tab-${tab.id}`
 }
 
-function panelId(tab) {
+function panelId(tab: TabItem & { id: TabId }): string {
   return `${uid}-panel-${tab.id}`
 }
 
-function onKeydown(event, index) {
+function onKeydown(event: KeyboardEvent, index: number): void {
   const enabled = normalizedTabs.value.filter((tab) => !tab.disabled)
   if (!enabled.length) return
   const currentIndex = enabled.findIndex((tab) => tab.id === activeId.value)
-  let nextIndex = null
+  let nextIndex: number
 
   switch (event.key) {
     case 'ArrowRight':
@@ -87,9 +104,11 @@ function onKeydown(event, index) {
   }
 
   event.preventDefault()
-  select(enabled[nextIndex])
+  const nextTab = enabled[nextIndex]
+  if (!nextTab) return
+  select(nextTab)
   nextTick(() => {
-    const el = document.getElementById(tabId(enabled[nextIndex]))
+    const el = document.getElementById(tabId(nextTab))
     el?.focus()
   })
 }

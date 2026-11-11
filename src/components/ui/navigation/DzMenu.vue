@@ -1,20 +1,24 @@
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue'
+import type { PropType } from 'vue'
 import { cn } from '@/utils/cn'
 import DzMenuItem from './DzMenuItem.vue'
+import type { MenuItemData } from './DzMenuItem.vue'
 
 const props = defineProps({
-  items: { type: Array, default: () => [] },
+  items: { type: Array as PropType<MenuItemData[]>, default: () => [] },
   orientation: { type: String, default: 'vertical' },
   size: { type: String, default: 'md' },
-  activeId: { type: [String, Number], default: null },
+  activeId: { type: [String, Number] as PropType<string | number | null>, default: null },
   rounded: { type: Boolean, default: true },
   bordered: { type: Boolean, default: false },
   title: { type: String, default: '' },
   ariaLabel: { type: String, default: 'Menu' },
 })
 
-const emit = defineEmits(['select'])
+const emit = defineEmits<{
+  select: [payload: { item: MenuItemData; event: MouseEvent }]
+}>()
 
 const classes = computed(() =>
   cn('menu', {

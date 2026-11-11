@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import { LayoutGrid, List, Table2 } from '@lucide/vue'
 import { useDemoMode } from '@/showcase/useDemoMode'

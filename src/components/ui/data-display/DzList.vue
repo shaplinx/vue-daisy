@@ -1,9 +1,19 @@
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue'
+import type { Component, PropType } from 'vue'
 import { cn } from '@/utils/cn'
 
+export interface ListItem {
+  id?: string | number
+  title?: string
+  description?: string
+  avatar?: string
+  icon?: Component
+  [key: string]: unknown
+}
+
 const props = defineProps({
-  items: { type: Array, default: () => [] },
+  items: { type: Array as PropType<ListItem[]>, default: () => [] },
   wrap: { type: Boolean, default: false },
   horizontal: { type: Boolean, default: false },
   ariaLabel: { type: String, default: 'List' },

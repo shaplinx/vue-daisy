@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
@@ -13,6 +13,7 @@ import {
   Settings,
 } from '@lucide/vue'
 import DzMenu from '@/components/ui/navigation/DzMenu.vue'
+import type { MenuItemData } from '@/components/ui/navigation/DzMenuItem.vue'
 import DzButton from '@/components/ui/actions/DzButton.vue'
 import { componentCategories } from '@/data/componentRegistry'
 
@@ -20,7 +21,10 @@ const props = defineProps({
   collapsed: { type: Boolean, default: false },
 })
 
-const emit = defineEmits(['toggle', 'navigate'])
+const emit = defineEmits<{
+  toggle: []
+  navigate: [item: MenuItemData]
+}>()
 const route = useRoute()
 const router = useRouter()
 
@@ -60,7 +64,7 @@ const groups = computed(() => [
   },
 ])
 
-function onSelect({ item }) {
+function onSelect({ item }: { item: MenuItemData }) {
   emit('navigate', item)
   if (item.to) router.push(item.to)
 }
@@ -90,7 +94,7 @@ function onSelect({ item }) {
         </p>
         <DzMenu
           :items="group.items"
-          :active-id="route.name"
+          :active-id="typeof route.name === 'string' ? route.name : null"
           class="mb-1"
           @select="onSelect"
         />

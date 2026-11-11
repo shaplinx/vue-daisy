@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { Menu, PanelLeftClose, PanelLeftOpen } from '@lucide/vue'
 import AppBreadcrumbs from './AppBreadcrumbs.vue'
 import GlobalSearch from './GlobalSearch.vue'

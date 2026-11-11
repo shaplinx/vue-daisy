@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import Sidebar from '@/components/dashboard/Sidebar.vue'
@@ -35,7 +35,7 @@ watch(
 const shellClass = computed(() => (collapsed.value ? 'lg:ms-20' : 'lg:ms-64'))
 const sidebarClass = computed(() => (collapsed.value ? 'lg:w-20 sidebar-collapsed' : 'lg:w-64'))
 
-function onKeydown(event) {
+function onKeydown(event: KeyboardEvent): void {
   if (event.key === 'Escape') mobileOpen.value = false
 }
 

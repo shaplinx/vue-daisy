@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue'
 import { cn } from '@/utils/cn'
 
@@ -24,9 +24,9 @@ const classes = computed(() =>
   }),
 )
 
-function onChange(event) {
-  emit('update:modelValue', event.target.checked)
-  emit('change', event.target.checked)
+function onChange(event: Event): void {
+  emit('update:modelValue', (event.target as HTMLInputElement).checked)
+  emit('change', (event.target as HTMLInputElement).checked)
 }
 </script>
 

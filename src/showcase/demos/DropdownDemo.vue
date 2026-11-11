@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import { ChevronDown, Copy, Pencil, Settings, Share2, Trash2 } from '@lucide/vue'
 import { useToast } from '@/composables/useToast'
@@ -9,8 +9,9 @@ const toast = useToast()
 const lastAction = ref('Nothing selected yet')
 const controlled = ref(false)
 
-function onSelect(event) {
-  const label = event.target.closest('[role="menuitem"], button, a')?.textContent?.trim() || 'Item'
+function onSelect(event: Event) {
+  const label =
+    (event.target as HTMLElement).closest('[role="menuitem"], button, a')?.textContent?.trim() || 'Item'
   lastAction.value = label
   toast.info(`Selected: ${label}`)
 }

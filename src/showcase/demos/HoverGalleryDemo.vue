@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { galleryImages } from '@/showcase/demoAssets'
 import { useDemoMode } from '@/showcase/useDemoMode'
 

@@ -1,9 +1,24 @@
+export interface DemoImage {
+  src: string
+  alt: string
+}
+
+export interface CarouselSlide extends DemoImage {
+  id: number
+}
+
 /**
  * Self-contained SVG data URIs used by showcase demos.
  * Keeping assets inline means the showcase works offline and follows no
  * external image hosts, while still demonstrating image-based components.
  */
-function gradient(label, from, to, width = 960, height = 600) {
+function gradient(
+  label: string,
+  from: string,
+  to: string,
+  width = 960,
+  height = 600,
+): string {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
   <defs>
     <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
@@ -26,7 +41,7 @@ export const gradientD = gradient('Citrus', '#eab308', '#84cc16')
 export const gradientE = gradient('Berry', '#8b5cf6', '#06b6d4')
 export const gradientF = gradient('Ember', '#ef4444', '#f59e0b')
 
-export const galleryImages = [
+export const galleryImages: DemoImage[] = [
   { src: gradientA, alt: 'Aurora gradient' },
   { src: gradientB, alt: 'Sunset gradient' },
   { src: gradientC, alt: 'Ocean gradient' },
@@ -34,7 +49,7 @@ export const galleryImages = [
   { src: gradientE, alt: 'Berry gradient' },
 ]
 
-export const carouselSlides = [
+export const carouselSlides: CarouselSlide[] = [
   { id: 1, src: gradientA, alt: 'Aurora slide' },
   { id: 2, src: gradientB, alt: 'Sunset slide' },
   { id: 3, src: gradientC, alt: 'Ocean slide' },

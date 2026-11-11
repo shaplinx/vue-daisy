@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue'
 import { Bell, CheckCircle2, Info, TriangleAlert, XCircle } from '@lucide/vue'
 import { useToast } from '@/composables/useToast'
@@ -15,8 +15,8 @@ const buttons = [
   { type: 'info', label: 'Info toast', icon: Info, color: 'info' },
 ]
 
-function show(type, duration = 4000) {
-  const map = {
+function show(type: string, duration = 4000) {
+  const map: Record<string, () => number> = {
     success: () => toast.success('Your changes were saved successfully.', { title: 'Success', duration }),
     error: () => toast.error('The request failed. Please try again.', { title: 'Error', duration }),
     warning: () => toast.warning('Your session expires in five minutes.', { title: 'Warning', duration }),
