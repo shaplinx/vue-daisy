@@ -22,19 +22,35 @@ export interface DataTableSortState {
   direction: DataTableSortDirection
 }
 
-/** Value of one column filter. Date ranges use `{ from, to }` objects. */
-export type DataTableFilterValue = string | number | null | { from?: string; to?: string }
+/**
+ * Value of one filter entry. The shape decides how client mode matches it:
+ * strings contain, arrays match membership, anything else compares equal.
+ * Ranges use two `<key>_from` / `<key>_to` entries (see `DataTableFilters`).
+ * `undefined` means "no filter" (an unchecked toggle removing its entry).
+ */
+export type DataTableFilterValue = string | number | boolean | Array<string | number> | null | undefined
 
-/** Column filter state, keyed by column key. */
+/**
+ * Filter state. Keys are free-form — bind any slot input with
+ * `v-model="filters.<key>"`. In client mode a key matching a column key
+ * filters that column; `<key>_from` / `<key>_to` pairs filter a range on
+ * `<key>`. Keys that match no column are passed through untouched (useful
+ * for page-side or server-side filtering of derived values).
+ */
 export type DataTableFilters = Record<string, DataTableFilterValue>
 
-/** Complete query state of a data table. */
+/** Complete query state of a data table; travels as one `v-model:query`. */
 export interface DataTableQuery {
   page: number
   perPage: number
   search: string
   sort: DataTableSortState
   filters: DataTableFilters
+}
+
+/** A query with every field optional, for seeding initial state. */
+export type PartialDataTableQuery = Partial<Omit<DataTableQuery, 'sort'>> & {
+  sort?: DataTableSortState
 }
 
 /** Laravel's standard `paginate()` JSON envelope, unmodified. */
@@ -75,15 +91,16 @@ export const LARAVEL_QUERY_PARAMS: Required<LaravelQueryParams> = {
 /**
  * Map table query state to Laravel query parameters.
  *
- * Filter values pass through under their column key; date ranges become
- * `key_from` / `key_to` pairs, matching Laravel's `whereBetween` usage.
+ * Filter entries pass through under their key; arrays become repeated
+ * `key[]` parameters (Laravel's array input convention) and `key_from` /
+ * `key_to` entries stay as-is, matching `whereBetween` usage.
  */
 export function toLaravelParams(
   query: DataTableQuery,
   overrides: LaravelQueryParams = {},
-): Record<string, string | number> {
+): Record<string, string | number | boolean | Array<string | number>> {
   const names = { ...LARAVEL_QUERY_PARAMS, ...overrides }
-  const params: Record<string, string | number> = {
+  const params: Record<string, string | number | boolean | Array<string | number>> = {
     [names.page]: query.page,
     [names.perPage]: query.perPage,
   }
@@ -97,10 +114,9 @@ export function toLaravelParams(
   }
 
   for (const [key, value] of Object.entries(query.filters)) {
-    if (value === null || value === '') continue
-    if (typeof value === 'object') {
-      if (value.from) params[`${key}_from`] = value.from
-      if (value.to) params[`${key}_to`] = value.to
+    if (value === null || value === undefined || value === '') continue
+    if (Array.isArray(value)) {
+      if (value.length) params[`${key}[]`] = value
     } else {
       params[key] = value
     }
@@ -110,8 +126,13 @@ export function toLaravelParams(
 }
 
 /** Serialize parameters to a query string (without a leading `?`). */
-export function buildQueryString(params: Record<string, string | number>): string {
+export function buildQueryString(
+  params: Record<string, string | number | boolean | Array<string | number>>,
+): string {
   const search = new URLSearchParams()
-  for (const [key, value] of Object.entries(params)) search.set(key, String(value))
+  for (const [key, value] of Object.entries(params)) {
+    if (Array.isArray(value)) value.forEach((item) => search.append(key, String(item)))
+    else search.set(key, String(value))
+  }
   return search.toString()
 }

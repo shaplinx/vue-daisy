@@ -571,6 +571,52 @@ export const components: RegistryComponent[] = [
     source: `<DzTable :columns="columns" :rows="users" selectable />`,
   },
   {
+    id: 'data-table',
+    name: 'Data Table',
+    category: 'data-display',
+    demo: 'DataTableDemo',
+    description:
+      'Data-source agnostic table with one joined v-model:query carrying page, per-page, search, sort and filters. Filter inputs live in a slot, so any component can bind to filters.<key> with v-model.',
+    props: [
+      p('query', 'Object', "—", 'Joined query state (v-model:query): { page, perPage, search, sort, filters }. Leave unbound to let the table manage it.'),
+      p('columns', 'Array', '[]', 'Column definitions: { key, label, sortable, align, width, hidden, formatter, sorter }'),
+      p('rows', 'Array', '[]', 'Row data (one page of it in server mode)'),
+      p('rowKey', 'String | Function', "'id'", 'Row identity used for keys and selection'),
+      p('mode', 'String', "'client'", "client applies search/filters/sort/pagination locally; server treats rows and envelope props as given"),
+      p('selected', 'Array', '[]', 'Selected row keys (v-model:selected)'),
+      p('searchable / searchPlaceholder', 'Boolean | String', 'true / "Search…"', 'Toolbar search input'),
+      p('selectable', 'Boolean', 'false', 'Adds checkbox selection with a bulk-actions bar'),
+      p('pageSizes', 'Array', '[10, 25, 50, 100]', 'Per-page choices in the footer select'),
+      p('total / from / to', 'Number', '0 / null', 'Server mode pagination envelope (record count and shown range)'),
+      p('loading / loadingRows', 'Boolean | Number', 'false / 5', 'Skeleton rows while fetching'),
+      p('error', 'String', "''", 'Error banner text; shown with a retry button'),
+      p('emptyText / zebra / size', 'String | Boolean', '"No records found" / false / md', 'Empty state text and table modifiers'),
+    ],
+    events: [
+      e('update:query', 'DataTableQuery', 'Any state change — search, filter, sort, page or per-page — as one joined object'),
+      e('update:selected', 'Array', 'Selection changed'),
+      e('row-click', '{ row, index }', 'A row was clicked'),
+      e('select-all', 'Array', 'The header checkbox toggled'),
+      e('retry', '—', 'The error banner retry button was clicked'),
+    ],
+    slots: [
+      s('filters', 'Filter panel body, scoped { filters, resetFilters } — bind any input with v-model="filters.<key>". Client mode matches by value shape: strings contain, arrays match membership, <key>_from/<key>_to bound a range'),
+      s('cell-{key}', 'Custom cell; receives row/column/value/index'),
+      s('header-{key}', 'Custom header; receives column'),
+      s('actions', 'Row actions; receives row/index (renders an Actions column)'),
+      s('bulk-actions', 'Selection bar; receives selected/count'),
+      s('empty', 'Empty state; receives search/filters'),
+      s('toolbar', 'Left side of the toolbar row'),
+    ],
+    source: `<DzDataTable v-model:query="query" :columns="columns" :rows="rows" selectable>
+  <template #filters="{ filters }">
+    <DzSelect v-model="filters.role" :options="roleOptions" aria-label="Filter by role" />
+    <DzInput v-model="filters.revenue_from" type="number" aria-label="Revenue from" />
+    <DzInput v-model="filters.revenue_to" type="number" aria-label="Revenue to" />
+  </template>
+</DzDataTable>`,
+  },
+  {
     id: 'text-rotate',
     name: 'Text Rotate',
     category: 'data-display',

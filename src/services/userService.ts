@@ -116,6 +116,8 @@ interface ParsedFilter {
   equals?: string
   from?: string
   to?: string
+  /** Membership list parsed from repeated `key[]` parameters. */
+  in?: string[]
 }
 
 /** Users list endpoint: Laravel paginator envelope driven by the query. */
@@ -144,7 +146,10 @@ export async function fetchUsers(query: DataTableQuery): Promise<LaravelPaginato
     if (RESERVED_PARAMS.has(key)) continue
     const value = rawValue.trim()
     if (!value) continue
-    if (key.endsWith('_from')) {
+    if (key.endsWith('[]')) {
+      const filter = (parsedFilters[key.slice(0, -2)] ??= {})
+      filter.in = [...(filter.in ?? []), value]
+    } else if (key.endsWith('_from')) {
       const column = key.slice(0, -5)
       const filter = (parsedFilters[column] ??= {})
       filter.from = value
@@ -168,6 +173,12 @@ export async function fetchUsers(query: DataTableQuery): Promise<LaravelPaginato
       if (
         filter.equals !== undefined &&
         String(cell ?? '').toLowerCase() !== filter.equals.toLowerCase()
+      ) {
+        return false
+      }
+      if (
+        filter.in !== undefined &&
+        !filter.in.includes(String(cell ?? '').toLowerCase())
       ) {
         return false
       }

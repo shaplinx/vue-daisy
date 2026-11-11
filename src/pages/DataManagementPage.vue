@@ -20,6 +20,9 @@ const statusOptions = USER_STATUSES.map((status) => ({
   label: status[0].toUpperCase() + status.slice(1),
   value: status,
 }))
+// Slot filter selects lead with an explicit "no filter" option.
+const roleFilterOptions = [{ label: 'All roles', value: '' }, ...roleOptions]
+const statusFilterOptions = [{ label: 'All statuses', value: '' }, ...statusOptions]
 
 const ROLE_BADGES: Record<UserRole, string> = {
   admin: 'badge-primary',
@@ -74,52 +77,30 @@ const userColumns: DataTableColumn[] = [
   { key: 'name', label: 'Name', sortable: true },
   // Hidden column: never rendered, but still covered by the global search.
   { key: 'email', label: 'Email', hidden: true },
-  {
-    key: 'role',
-    label: 'Role',
-    sortable: true,
-    align: 'center',
-    filter: { type: 'select', options: roleOptions, placeholder: 'All roles' },
-  },
-  {
-    key: 'status',
-    label: 'Status',
-    sortable: true,
-    align: 'center',
-    filter: { type: 'select', options: statusOptions, placeholder: 'All statuses' },
-  },
+  { key: 'role', label: 'Role', sortable: true, align: 'center' },
+  { key: 'status', label: 'Status', sortable: true, align: 'center' },
   { key: 'company', label: 'Company', sortable: true },
   {
     key: 'lastLoginAt',
     label: 'Last login',
     sortable: true,
     align: 'end',
-    filter: { type: 'date-range' },
     formatter: formatLastLogin,
   },
 ]
 
 const {
-  page,
-  perPage,
-  search,
-  sort,
-  filters,
+  query,
   rows,
   total,
   from,
   to,
   loading,
   error,
-  setPage,
-  setPerPage,
-  setSearch,
-  setSort,
-  setFilters,
   refresh,
 } = useDataTable<User>({
   fetcher: fetchUsers,
-  initialSort: { key: 'name', direction: 'asc' },
+  initialQuery: { sort: { key: 'name', direction: 'asc' } },
 })
 
 const selectedIds = ref<Array<string | number>>([])
@@ -354,6 +335,8 @@ const invoiceStatusOptions = INVOICE_STATUSES.map((status) => ({
   label: status[0].toUpperCase() + status.slice(1),
   value: status,
 }))
+// Slot filter select with an explicit "no filter" option.
+const invoiceFilterOptions = [{ label: 'All statuses', value: '' }, ...invoiceStatusOptions]
 
 function formatCurrency(value: unknown): string {
   return new Intl.NumberFormat('en-US', {
@@ -392,13 +375,7 @@ const invoiceColumns = computed<DataTableColumn[]>(() => [
   { key: 'number', label: 'Invoice', sortable: true },
   { key: 'client', label: 'Client', sortable: true, hidden: !showClientColumn.value },
   { key: 'amount', label: 'Amount', sortable: true, align: 'end', formatter: formatCurrency },
-  {
-    key: 'status',
-    label: 'Status',
-    sortable: true,
-    align: 'center',
-    filter: { type: 'select', options: invoiceStatusOptions, placeholder: 'All statuses' },
-  },
+  { key: 'status', label: 'Status', sortable: true, align: 'center' },
   { key: 'issuedAt', label: 'Issued', sortable: true, align: 'end', formatter: formatDate },
 ])
 </script>
@@ -412,9 +389,13 @@ const invoiceColumns = computed<DataTableColumn[]>(() => [
       </div>
       <p class="max-w-3xl text-sm text-base-content/70">
         The reusable DataTable in action. The users table below never touches an API: every search,
-        filter, sort and page change leaves the table as an event, the page routes it through
-        <code class="rounded bg-base-200 px-1 py-0.5 text-[0.85em]">useDataTable</code> into the mock
-        Laravel service, and rows return as props inside Laravel's native pagination envelope.
+        filter, sort and page change leaves the table as one joined
+        <code class="rounded bg-base-200 px-1 py-0.5 text-[0.85em]">update:query</code> event, the
+        page routes it through
+        <code class="rounded bg-base-200 px-1 py-0.5 text-[0.85em]">useDataTable</code> into the
+        mock Laravel service, and rows return as props inside Laravel's native pagination envelope.
+        The filter panel is a plain slot — each input is bound with
+        <code class="rounded bg-base-200 px-1 py-0.5 text-[0.85em]">v-model="filters.&lt;key&gt;"</code>.
       </p>
     </header>
 
@@ -440,15 +421,11 @@ const invoiceColumns = computed<DataTableColumn[]>(() => [
 
       <DzDataTable
         mode="server"
+        v-model:query="query"
         :columns="userColumns"
         :rows="rows"
         selectable
         zebra
-        :page="page"
-        :per-page="perPage"
-        :search="search"
-        :sort="sort"
-        :filters="filters"
         :total="total"
         :from="from"
         :to="to"
@@ -458,13 +435,46 @@ const invoiceColumns = computed<DataTableColumn[]>(() => [
         search-placeholder="Search users…"
         empty-text="No users match your search or filters"
         aria-label="Users"
-        @update:page="setPage"
-        @update:per-page="setPerPage"
-        @update:search="setSearch"
-        @update:sort="setSort"
-        @update:filters="setFilters"
         @retry="refresh"
       >
+        <!-- Filter panel: plain slot inputs, each bound with v-model -->
+        <template #filters="{ filters }">
+          <div class="flex flex-col gap-1">
+            <span class="text-xs font-medium text-base-content/70">Role</span>
+            <DzSelect
+              v-model="filters.role"
+              :options="roleFilterOptions"
+              size="sm"
+              aria-label="Filter by Role"
+            />
+          </div>
+          <div class="flex flex-col gap-1">
+            <span class="text-xs font-medium text-base-content/70">Status</span>
+            <DzSelect
+              v-model="filters.status"
+              :options="statusFilterOptions"
+              size="sm"
+              aria-label="Filter by Status"
+            />
+          </div>
+          <div class="flex flex-col gap-1">
+            <span class="text-xs font-medium text-base-content/70">Last login</span>
+            <div class="grid grid-cols-2 gap-2">
+              <DzInput
+                v-model="filters.lastLoginAt_from"
+                type="date"
+                size="sm"
+                aria-label="Last login from"
+              />
+              <DzInput
+                v-model="filters.lastLoginAt_to"
+                type="date"
+                size="sm"
+                aria-label="Last login to"
+              />
+            </div>
+          </div>
+        </template>
         <template #toolbar>
           <DzButton color="primary" size="sm" @click="openCreate">
             <template #icon>
@@ -559,6 +569,39 @@ const invoiceColumns = computed<DataTableColumn[]>(() => [
         empty-text="No invoices match your search or filters"
         aria-label="Invoices"
       >
+        <template #filters="{ filters }">
+          <div class="flex flex-col gap-1">
+            <span class="text-xs font-medium text-base-content/70">Status</span>
+            <DzSelect
+              v-model="filters.status"
+              :options="invoiceFilterOptions"
+              size="sm"
+              aria-label="Filter by Status"
+            />
+          </div>
+          <div class="flex flex-col gap-1">
+            <span class="text-xs font-medium text-base-content/70">Amount</span>
+            <div class="grid grid-cols-2 gap-2">
+              <DzInput
+                v-model="filters.amount_from"
+                type="number"
+                min="0"
+                size="sm"
+                placeholder="From"
+                aria-label="Amount from"
+              />
+              <DzInput
+                v-model="filters.amount_to"
+                type="number"
+                min="0"
+                size="sm"
+                placeholder="To"
+                aria-label="Amount to"
+              />
+            </div>
+          </div>
+        </template>
+
         <template #cell-status="{ value }">
           <span class="badge badge-sm capitalize" :class="invoiceStatusBadgeClass(value)">
             {{ value }}

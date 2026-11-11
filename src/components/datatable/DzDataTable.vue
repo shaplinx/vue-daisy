@@ -2,17 +2,20 @@
 /**
  * DzDataTable — a configurable, data-source agnostic table.
  *
- * The component never fetches. Rows and pagination metadata arrive as props;
- * user interactions leave as `update:*` events that the owning page routes
- * to its data layer (see `useDataTable` + `src/services/api.ts`). In
- * `mode="client"` the table applies search, column filters, sorting and
+ * The component never fetches. Rows and pagination metadata arrive as
+ * props; every state change — page, page size, search, sort and slot-edited
+ * filters — leaves as a single `update:query` event carrying the complete
+ * query object (bind it with `v-model:query`, see `src/services/api.ts`).
+ * In `mode="client"` the table applies search, filters, sorting and
  * pagination locally over the `rows` prop.
  *
- * All query state (`page`, `perPage`, `search`, `sort`, `filters`,
- * `selected`) is a two-way model: bind it for server mode and handle the
- * `update:*` events, or leave it unbound for self-managed client mode.
+ * The filter panel is a plain `filters` slot scoped with the filter values,
+ * so any input component can be bound directly with
+ * `v-model="filters.<key>"`. In client mode a filter key matching a column
+ * key filters that column (strings contain, arrays match membership, other
+ * values compare equal) and `<key>_from` / `<key>_to` entries bound a range.
  */
-import { computed, ref, useId, useSlots, watch } from 'vue'
+import { computed, reactive, ref, useId, useSlots, watch } from 'vue'
 import type { PropType } from 'vue'
 import { ArrowDown, ArrowUp, ArrowUpDown, Funnel, Inbox, RotateCcw, Search, TriangleAlert } from '@lucide/vue'
 import DzButton from '@/components/ui/actions/DzButton.vue'
@@ -23,18 +26,9 @@ import DzPagination from '@/components/ui/navigation/DzPagination.vue'
 import { cellInRange, compareCellValues } from '@/utils/cell'
 import { cn } from '@/utils/cn'
 import { modifier, SIZES } from '@/utils/daisy'
-import type { DataTableFilterValue, DataTableFilters, DataTableSortState } from '@/services/api'
+import type { DataTableFilterValue, DataTableQuery, DataTableSortState } from '@/services/api'
 
 export type DataTableRow = Record<string, unknown>
-
-export interface DataTableColumnFilter {
-  /** Input kind rendered in the filter panel. */
-  type: 'text' | 'select' | 'date-range'
-  /** Options for select filters. */
-  options?: Array<{ label: string; value: string | number }>
-  /** Placeholder for text filters; label of a select's "no filter" option. */
-  placeholder?: string
-}
 
 export interface DataTableColumn {
   key: string
@@ -50,11 +44,10 @@ export interface DataTableColumn {
   formatter?: (value: unknown, row: DataTableRow, column: DataTableColumn, index: number) => unknown
   /** Direction-aware comparator used by client-mode sorting. */
   sorter?: (a: DataTableRow, b: DataTableRow, direction: 'asc' | 'desc') => number
-  /** Column filter config; `true` is shorthand for a text filter. */
-  filter?: boolean | DataTableColumnFilter
 }
 
 type SelectChangeValue = string | number | Array<string | number>
+type InputValue = string | number
 
 const props = defineProps({
   columns: { type: Array as PropType<DataTableColumn[]>, default: () => [] },
@@ -67,8 +60,6 @@ const props = defineProps({
   mode: { type: String as PropType<'client' | 'server'>, default: 'client' },
   searchable: { type: Boolean, default: true },
   searchPlaceholder: { type: String, default: 'Search…' },
-  /** Render the filter panel for columns that declare a filter. */
-  filterable: { type: Boolean, default: true },
   selectable: { type: Boolean, default: false },
   pageSizes: { type: Array as PropType<number[]>, default: () => [10, 25, 50, 100] },
   /** Server mode: total record count from the paginator envelope. */
@@ -93,35 +84,146 @@ const emit = defineEmits<{
   retry: []
 }>()
 
-const page = defineModel<number>('page', { default: 1 })
-const perPage = defineModel<number>('perPage', { default: 10 })
-const search = defineModel<string>('search', { default: '' })
-const sort = defineModel<DataTableSortState>('sort', { default: () => ({ key: null, direction: 'asc' as const }) })
-const filters = defineModel<DataTableFilters>('filters', { default: () => ({}) })
+/**
+ * One joined model: the complete query state of the table. Bind it for
+ * server mode (or to seed/observe client mode); leave it unbound and the
+ * table manages its own state.
+ */
+const query = defineModel<DataTableQuery>('query', {
+  default: () => ({
+    page: 1,
+    perPage: 10,
+    search: '',
+    sort: { key: null, direction: 'asc' as const },
+    filters: {},
+  }),
+})
 const selected = defineModel<Array<string | number>>('selected', { default: () => [] })
 
 const slots = useSlots()
 const uid = useId()
 
 const hasActions = computed(() => Boolean(slots.actions))
+/** The filter panel renders whenever a `filters` slot is provided. */
+const hasFilters = computed(() => Boolean(slots.filters))
 const isClient = computed(() => props.mode === 'client')
 const visibleColumns = computed(() => props.columns.filter((column) => !column.hidden))
-
-function normalizeFilter(column: DataTableColumn): DataTableColumnFilter {
-  return typeof column.filter === 'object' ? column.filter : { type: 'text', placeholder: 'Filter' }
-}
-
-const filterableColumns = computed(() =>
-  props.filterable
-    ? props.columns
-        .filter((column) => !column.hidden && column.filter)
-        .map((column) => ({ column, config: normalizeFilter(column) }))
-    : [],
-)
 
 const columnCount = computed(
   () => visibleColumns.value.length + (props.selectable ? 1 : 0) + (hasActions.value ? 1 : 0),
 )
+
+// ---------------------------------------------------------------------------
+// Query updates — every mutation emits one joined `update:query`
+// ---------------------------------------------------------------------------
+
+function updateQuery(patch: Partial<DataTableQuery>): void {
+  query.value = { ...query.value, ...patch }
+}
+
+/** Footer pagination binding over `query.page`. */
+const page = computed<number>({
+  get: () => query.value.page,
+  set: (next) => updateQuery({ page: next }),
+})
+
+function toggleSort(column: DataTableColumn): void {
+  if (!column.sortable) return
+  const current = query.value.sort
+  let next: DataTableSortState
+  if (current.key !== column.key) next = { key: column.key, direction: 'asc' }
+  else if (current.direction === 'asc') next = { key: column.key, direction: 'desc' }
+  else next = { key: null, direction: 'asc' }
+  updateQuery({ sort: next, page: 1 })
+}
+
+function onSearchInput(value: InputValue): void {
+  updateQuery({ search: String(value), page: 1 })
+}
+
+function onPerPageChange(value: SelectChangeValue): void {
+  const next = Number(Array.isArray(value) ? value[0] : value)
+  if (Number.isFinite(next) && next > 0 && next !== query.value.perPage) {
+    updateQuery({ perPage: next, page: 1 })
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Filter state — slot-scoped and v-model friendly
+// ---------------------------------------------------------------------------
+
+/**
+ * Reactive mirror of `query.filters` handed to the `filters` slot. Slot
+ * inputs bind with `v-model="filters.<key>"`; writes flow out as one
+ * `update:query` emit. External query changes sync in (diffed, so the emit
+ * echo does not loop). Values are intentionally `any` so any input
+ * component's model can bind here — the matchers above constrain the
+ * supported shapes at runtime.
+ */
+const filterState = reactive<Record<string, any>>({ ...query.value.filters })
+
+/**
+ * Snapshot of the filters last emitted by the mutation watcher below. The
+ * import watcher compares incoming query filters against it and skips
+ * matching echoes — a search- or page-only `update:query` changes the query
+ * object identity, which alone re-runs the deep import watcher; without
+ * this guard it would resurrect filter keys deleted in the same tick
+ * (before the deletion's own emit round-trips through the parent).
+ */
+let lastEmittedFilters: Record<string, any> | null = null
+
+function filtersMatch(a: Record<string, any>, b: Record<string, any>): boolean {
+  const keys = Object.keys(a)
+  if (keys.length !== Object.keys(b).length) return false
+  return keys.every((key) => a[key] === b[key])
+}
+
+// The import watcher runs after the parent re-renders (`flush: 'post'`): a
+// `defineModel` prop only reflects an emitted value once the parent has
+// re-rendered, so a pre-flush import would read the stale previous filters
+// and resurrect keys deleted in the same tick. The snapshot guard then skips
+// echoes of our own emits.
+watch(
+  () => query.value.filters,
+  (next) => {
+    if (lastEmittedFilters && filtersMatch(next, lastEmittedFilters)) return
+    for (const key of Object.keys(filterState)) {
+      if (!(key in next)) delete filterState[key]
+    }
+    for (const [key, value] of Object.entries(next)) {
+      if (filterState[key] !== value) filterState[key] = value
+    }
+  },
+  { deep: true, flush: 'post' },
+)
+
+watch(
+  filterState,
+  () => {
+    // Filter edits return to the first page, like every other query change.
+    lastEmittedFilters = { ...filterState }
+    updateQuery({ page: 1, filters: { ...filterState } })
+  },
+  { deep: true },
+)
+
+/** Clear every filter entry and the search term. */
+function resetFilters(): void {
+  for (const key of Object.keys(filterState)) delete filterState[key]
+  if (query.value.search) updateQuery({ search: '', page: 1 })
+}
+
+function isEmptyFilter(value: DataTableFilterValue | undefined): boolean {
+  if (value === null || value === undefined || value === '') return true
+  if (Array.isArray(value)) return value.length === 0
+  return false
+}
+
+const activeFilterCount = computed(
+  () => Object.values(filterState).filter((value) => !isEmptyFilter(value)).length,
+)
+
+const filterPanelOpen = ref(false)
 
 // ---------------------------------------------------------------------------
 // Client mode pipeline: search → filter → sort → paginate
@@ -133,48 +235,59 @@ function displayValue(row: DataTableRow, column: DataTableColumn, index: number)
   return value === null || value === undefined ? '' : String(value)
 }
 
-function filterValue(column: DataTableColumn): DataTableFilterValue | undefined {
-  return filters.value[column.key]
-}
-
-function isEmptyFilter(value: DataTableFilterValue | undefined): boolean {
-  if (value === null || value === undefined || value === '') return true
-  if (typeof value === 'object') return !value.from && !value.to
-  return false
-}
-
-function rowMatchesFilter(row: DataTableRow, column: DataTableColumn, config: DataTableColumnFilter): boolean {
-  const value = filterValue(column)
-  if (isEmptyFilter(value)) return true
-  const cell = row[column.key]
-
-  if (value !== null && typeof value === 'object') {
-    return cellInRange(cell, value.from, value.to)
+/** Range bound of a `<key>_from` / `<key>_to` filter entry. */
+function rangeBound(value: DataTableFilterValue | undefined): string | undefined {
+  if (value === null || value === undefined || value === '' || Array.isArray(value) || typeof value === 'boolean') {
+    return undefined
   }
+  return String(value)
+}
 
-  const expected = String(value).toLowerCase()
-  const actual = cell === null || cell === undefined ? '' : String(cell).toLowerCase()
-  return config.type === 'select' ? actual === expected : actual.includes(expected)
+/**
+ * Client-mode filter evaluation. Values match by shape: strings contain,
+ * arrays match membership, anything else compares equal; `<key>_from` /
+ * `<key>_to` entries bound a range on `<key>`. Keys without a matching
+ * column are ignored — use them for page- or server-side filtering.
+ */
+function rowPassesFilters(row: DataTableRow): boolean {
+  for (const [key, value] of Object.entries(filterState)) {
+    if (isEmptyFilter(value)) continue
+
+    if (key.endsWith('_from') || key.endsWith('_to')) {
+      const column = key.endsWith('_from') ? key.slice(0, -5) : key.slice(0, -3)
+      const from = rangeBound(key.endsWith('_from') ? value : filterState[`${column}_from`])
+      const to = rangeBound(key.endsWith('_to') ? value : filterState[`${column}_to`])
+      if (!cellInRange(row[column], from, to)) return false
+      continue
+    }
+
+    if (!(key in row)) continue
+    const cell = row[key]
+    const actual = cell === null || cell === undefined ? '' : String(cell).toLowerCase()
+    if (Array.isArray(value)) {
+      if (!value.some((item) => actual === String(item).toLowerCase())) return false
+    } else if (!actual.includes(String(value).toLowerCase())) {
+      return false
+    }
+  }
+  return true
 }
 
 const clientFiltered = computed<DataTableRow[]>(() => {
   if (!isClient.value) return props.rows
-  const term = search.value.trim().toLowerCase()
+  const term = query.value.search.trim().toLowerCase()
   return props.rows.filter((row) => {
     const matchesSearch =
       !term || props.columns.some((column) => displayValue(row, column, 0).toLowerCase().includes(term))
-    return (
-      matchesSearch &&
-      filterableColumns.value.every(({ column, config }) => rowMatchesFilter(row, column, config))
-    )
+    return matchesSearch && rowPassesFilters(row)
   })
 })
 
 const clientSorted = computed<DataTableRow[]>(() => {
-  if (!isClient.value || !sort.value.key) return clientFiltered.value
-  const column = props.columns.find((item) => item.key === sort.value.key)
+  if (!isClient.value || !query.value.sort.key) return clientFiltered.value
+  const column = props.columns.find((item) => item.key === query.value.sort.key)
   if (!column) return clientFiltered.value
-  const direction = sort.value.direction
+  const direction = query.value.sort.direction
   const rows = [...clientFiltered.value]
   rows.sort((a, b) => {
     if (column.sorter) return column.sorter(a, b, direction)
@@ -186,41 +299,35 @@ const clientSorted = computed<DataTableRow[]>(() => {
 
 const displayRows = computed<DataTableRow[]>(() => {
   if (!isClient.value) return props.rows
-  const start = (page.value - 1) * perPage.value
-  return clientSorted.value.slice(start, start + perPage.value)
+  const start = (query.value.page - 1) * query.value.perPage
+  return clientSorted.value.slice(start, start + query.value.perPage)
 })
 
 const totalCount = computed(() => (isClient.value ? clientFiltered.value.length : props.total))
-const lastPage = computed(() => Math.max(1, Math.ceil(totalCount.value / Math.max(1, perPage.value))))
+const lastPage = computed(() =>
+  Math.max(1, Math.ceil(totalCount.value / Math.max(1, query.value.perPage))),
+)
 
 const rangeFrom = computed(() => {
   if (!isClient.value && props.from !== null) return props.from
-  return displayRows.value.length ? (page.value - 1) * perPage.value + 1 : null
+  return displayRows.value.length ? (query.value.page - 1) * query.value.perPage + 1 : null
 })
 
 const rangeTo = computed(() => {
   if (!isClient.value && props.to !== null) return props.to
-  return displayRows.value.length ? (page.value - 1) * perPage.value + displayRows.value.length : null
+  return displayRows.value.length
+    ? (query.value.page - 1) * query.value.perPage + displayRows.value.length
+    : null
 })
 
 // Keep client mode on a valid page when result sets shrink.
 watch(lastPage, (max) => {
-  if (isClient.value && page.value > max) page.value = max
+  if (isClient.value && query.value.page > max) updateQuery({ page: max })
 })
 
 // ---------------------------------------------------------------------------
-// Interactions — every mutation is a `update:*` emit routed by the owner
+// Row selection
 // ---------------------------------------------------------------------------
-
-function toggleSort(column: DataTableColumn): void {
-  if (!column.sortable) return
-  let next: DataTableSortState
-  if (sort.value.key !== column.key) next = { key: column.key, direction: 'asc' }
-  else if (sort.value.direction === 'asc') next = { key: column.key, direction: 'desc' }
-  else next = { key: null, direction: 'asc' }
-  sort.value = next
-  page.value = 1
-}
 
 function keyFor(row: DataTableRow, index: number): string | number {
   if (typeof props.rowKey === 'function') return props.rowKey(row, index)
@@ -248,81 +355,15 @@ function toggleAll(): void {
 }
 
 // ---------------------------------------------------------------------------
-// Toolbar, filter panel and footer wiring
-// ---------------------------------------------------------------------------
-
-function onSearchInput(value: string | number): void {
-  search.value = String(value)
-}
-
-const filterPanelOpen = ref(false)
-const activeFilterCount = computed(
-  () => filterableColumns.value.filter(({ column }) => !isEmptyFilter(filterValue(column))).length,
-)
-
-function textFilterValue(column: DataTableColumn): string {
-  const value = filterValue(column)
-  return typeof value === 'string' || typeof value === 'number' ? String(value) : ''
-}
-
-function selectFilterValue(column: DataTableColumn): string | number {
-  const value = filterValue(column)
-  return typeof value === 'string' || typeof value === 'number' ? value : ''
-}
-
-function rangeFilterBound(column: DataTableColumn, bound: 'from' | 'to'): string {
-  const value = filterValue(column)
-  if (value && typeof value === 'object') return value[bound] ?? ''
-  return ''
-}
-
-function setFilterValue(column: DataTableColumn, value: DataTableFilterValue): void {
-  filters.value = { ...filters.value, [column.key]: value }
-}
-
-function onTextFilterInput(column: DataTableColumn, value: string | number): void {
-  setFilterValue(column, String(value))
-}
-
-function onSelectFilterChange(column: DataTableColumn, value: SelectChangeValue): void {
-  setFilterValue(column, Array.isArray(value) ? String(value[0] ?? '') : value)
-}
-
-function onRangeFilterInput(column: DataTableColumn, bound: 'from' | 'to', value: string | number): void {
-  const current = filterValue(column)
-  const range = current && typeof current === 'object' ? { ...current } : {}
-  range[bound] = String(value)
-  setFilterValue(column, range)
-}
-
-function selectFilterOptions(config: DataTableColumnFilter): Array<{ label: string; value: string | number }> {
-  return [{ label: config.placeholder ?? 'All', value: '' }, ...(config.options ?? [])]
-}
-
-function resetFilters(): void {
-  filters.value = {}
-  if (search.value) search.value = ''
-  page.value = 1
-}
-
-const pageSizeOptions = computed(() => {
-  const sizes = props.pageSizes.includes(perPage.value)
-    ? props.pageSizes
-    : [...props.pageSizes, perPage.value].sort((a, b) => a - b)
-  return sizes.map((size) => ({ label: String(size), value: size }))
-})
-
-function onPerPageChange(value: SelectChangeValue): void {
-  const next = Number(Array.isArray(value) ? value[0] : value)
-  if (Number.isFinite(next) && next > 0 && next !== perPage.value) {
-    perPage.value = next
-    page.value = 1
-  }
-}
-
-// ---------------------------------------------------------------------------
 // Presentation helpers
 // ---------------------------------------------------------------------------
+
+const pageSizeOptions = computed(() => {
+  const sizes = props.pageSizes.includes(query.value.perPage)
+    ? props.pageSizes
+    : [...props.pageSizes, query.value.perPage].sort((a, b) => a - b)
+  return sizes.map((size) => ({ label: String(size), value: size }))
+})
 
 const tableClass = computed(() =>
   cn('table', modifier('table', props.size, SIZES), { 'table-zebra': props.zebra }),
@@ -338,8 +379,8 @@ function alignClass(align?: string): Record<string, boolean> {
 
 function ariaSort(column: DataTableColumn): 'ascending' | 'descending' | 'none' | undefined {
   if (!column.sortable) return undefined
-  if (sort.value.key !== column.key) return 'none'
-  return sort.value.direction === 'asc' ? 'ascending' : 'descending'
+  if (query.value.sort.key !== column.key) return 'none'
+  return query.value.sort.direction === 'asc' ? 'ascending' : 'descending'
 }
 </script>
 
@@ -348,10 +389,10 @@ function ariaSort(column: DataTableColumn): 'ascending' | 'descending' | 'none' 
     <!-- Toolbar -->
     <div class="flex flex-wrap items-center gap-2">
       <slot name="toolbar" />
-      <div v-if="searchable || filterableColumns.length" class="ms-auto flex flex-wrap items-center gap-2">
+      <div v-if="searchable || hasFilters" class="ms-auto flex flex-wrap items-center gap-2">
         <DzInput
           v-if="searchable"
-          :model-value="search"
+          :model-value="query.search"
           size="sm"
           :placeholder="searchPlaceholder"
           :aria-label="searchPlaceholder"
@@ -364,7 +405,7 @@ function ariaSort(column: DataTableColumn): 'ascending' | 'descending' | 'none' 
           </template>
         </DzInput>
         <DzButton
-          v-if="filterableColumns.length"
+          v-if="hasFilters"
           size="sm"
           :variant="filterPanelOpen ? 'soft' : 'outline'"
           :aria-expanded="filterPanelOpen"
@@ -392,54 +433,14 @@ function ariaSort(column: DataTableColumn): 'ascending' | 'descending' | 'none' 
       </DzButton>
     </div>
 
-    <!-- Filter panel -->
+    <!-- Filter panel: any input, bound with v-model to filter entries -->
     <div
-      v-if="filterPanelOpen && filterableColumns.length"
+      v-if="filterPanelOpen && hasFilters"
       :id="`dz-table-filters-${uid}`"
       class="rounded-box border border-base-300 bg-base-200/40 p-3 sm:p-4"
     >
       <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        <template v-for="{ column, config } in filterableColumns" :key="column.key">
-          <div class="flex flex-col gap-1">
-            <span class="text-xs font-medium text-base-content/70">{{ column.label ?? column.key }}</span>
-
-            <DzInput
-              v-if="config.type === 'text'"
-              :model-value="textFilterValue(column)"
-              size="sm"
-              :placeholder="config.placeholder ?? 'Filter'"
-              :aria-label="`Filter by ${column.label ?? column.key}`"
-              clearable
-              @update:model-value="(value: string | number) => onTextFilterInput(column, value)"
-            />
-
-            <DzSelect
-              v-else-if="config.type === 'select'"
-              :model-value="selectFilterValue(column)"
-              :options="selectFilterOptions(config)"
-              size="sm"
-              :aria-label="`Filter by ${column.label ?? column.key}`"
-              @update:model-value="(value: SelectChangeValue) => onSelectFilterChange(column, value)"
-            />
-
-            <div v-else class="grid grid-cols-2 gap-2">
-              <DzInput
-                type="date"
-                :model-value="rangeFilterBound(column, 'from')"
-                size="sm"
-                :aria-label="`${column.label ?? column.key} from`"
-                @update:model-value="(value: string | number) => onRangeFilterInput(column, 'from', value)"
-              />
-              <DzInput
-                type="date"
-                :model-value="rangeFilterBound(column, 'to')"
-                size="sm"
-                :aria-label="`${column.label ?? column.key} to`"
-                @update:model-value="(value: string | number) => onRangeFilterInput(column, 'to', value)"
-              />
-            </div>
-          </div>
-        </template>
+        <slot name="filters" :filters="filterState" :reset-filters="resetFilters" />
       </div>
       <div class="mt-3 flex justify-end">
         <DzButton size="sm" variant="ghost" @click="resetFilters">
@@ -498,11 +499,11 @@ function ariaSort(column: DataTableColumn): 'ascending' | 'descending' | 'none' 
                 </slot>
                 <template v-if="column.sortable">
                   <ArrowUp
-                    v-if="sort.key === column.key && sort.direction === 'asc'"
+                    v-if="query.sort.key === column.key && query.sort.direction === 'asc'"
                     class="size-3.5"
                     aria-hidden="true"
                   />
-                  <ArrowDown v-else-if="sort.key === column.key" class="size-3.5" aria-hidden="true" />
+                  <ArrowDown v-else-if="query.sort.key === column.key" class="size-3.5" aria-hidden="true" />
                   <ArrowUpDown v-else class="size-3.5 opacity-40" aria-hidden="true" />
                 </template>
               </span>
@@ -570,7 +571,7 @@ function ariaSort(column: DataTableColumn): 'ascending' | 'descending' | 'none' 
           <!-- Empty state -->
           <tr v-else>
             <td :colspan="columnCount" class="py-10 text-center">
-              <slot name="empty" :search="search" :filters="filters">
+              <slot name="empty" :search="query.search" :filters="filterState">
                 <div class="flex flex-col items-center gap-2">
                   <Inbox class="size-8 opacity-40" aria-hidden="true" />
                   <span class="text-sm opacity-70">{{ emptyText }}</span>
@@ -596,7 +597,7 @@ function ariaSort(column: DataTableColumn): 'ascending' | 'descending' | 'none' 
           <span class="hidden sm:inline">Per page</span>
           <span class="sm:hidden">Rows</span>
           <DzSelect
-            :model-value="perPage"
+            :model-value="query.perPage"
             :options="pageSizeOptions"
             size="xs"
             aria-label="Rows per page"
