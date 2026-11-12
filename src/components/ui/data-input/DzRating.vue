@@ -11,6 +11,8 @@ const props = defineProps({
   allowClear: { type: Boolean, default: true },
   readonly: { type: Boolean, default: false },
   label: { type: String, default: 'Rating' },
+  id: { type: String, default: undefined },
+  ariaDescribedby: { type: String, default: undefined },
 })
 
 const emit = defineEmits(['update:modelValue', 'change'])
@@ -28,7 +30,14 @@ function select(star: number): void {
 </script>
 
 <template>
-  <div :class="classes" role="radiogroup" :aria-label="label">
+  <div
+    :id="id"
+    :class="classes"
+    role="radiogroup"
+    :aria-label="label"
+    :aria-describedby="ariaDescribedby"
+    :aria-disabled="readonly || undefined"
+  >
     <button
       v-for="star in max"
       :key="star"

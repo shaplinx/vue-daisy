@@ -1,9 +1,12 @@
 @import 'tailwindcss';
 
+@plugin "@formkit/themes/tailwindcss";
+
 @plugin 'daisyui' {
   themes: light --default, dark --prefersdark, corporate, business, cupcake, dracula;
   logs: false;
 }
+
 
 /*
  * Safelist for classes that only ever get assembled at runtime by the

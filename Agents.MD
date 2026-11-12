@@ -645,7 +645,700 @@ Follow these phases:
 - Build reusable form examples.
 - Validate all form interactions.
 
-### Phase 5 — Quality Assurance
+### Phase 5 — Pluggable Authentication Driver System
+
+#### 1. Objective
+
+Implement a reusable, configurable authentication system that supports Laravel Sanctum authentication.
+
+The authentication system must support three operating modes:
+
+1. Laravel Sanctum Stateful SPA Authentication (Cookie / Session).
+2. Laravel Sanctum Personal Access Token Authentication (Bearer Token).
+3. Authentication Disabled (Public / Development Mode).
+
+The authentication architecture must be driver-based and extensible.
+
+The application must not be tightly coupled to a particular authentication implementation.
+
+All authentication operations must go through a unified authentication interface, regardless of the selected driver.
+
+Use Vue 3 Composition API, TypeScript, Pinia where appropriate, Vue Router, and the existing API service layer.
+
+Do not rewrite existing components, DataTable, or FormKit implementations.
+
+---
+
+#### 2. Authentication Driver Configuration
+
+Create a centralized authentication configuration.
+
+Suggested configuration:
+
+```typescript
+export type AuthDriver =
+  | 'sanctum-spa'
+  | 'sanctum-token'
+  | 'none'
+
+export interface AuthConfig {
+  driver: AuthDriver
+
+  apiBaseUrl: string
+
+  endpoints: {
+    login: string
+    logout: string
+    user: string
+    csrfCookie: string
+    forgotPassword?: string
+    resetPassword?: string
+  }
+
+  token: {
+    storage: 'memory' | 'sessionStorage'
+    responsePath: string
+    headerName: string
+    prefix: string
+  }
+
+  redirect: {
+    login: string
+    afterLogin: string
+    afterLogout: string
+  }
+}
+```
+
+Use environment variables for deployment-level configuration.
+
+Example:
+
+```env
+VITE_AUTH_DRIVER=sanctum-spa
+
+VITE_API_BASE_URL=http://localhost:8000
+
+VITE_AUTH_LOGIN_ENDPOINT=/login
+VITE_AUTH_LOGOUT_ENDPOINT=/logout
+VITE_AUTH_USER_ENDPOINT=/api/user
+VITE_AUTH_CSRF_ENDPOINT=/sanctum/csrf-cookie
+
+VITE_AUTH_TOKEN_STORAGE=memory
+```
+
+Supported driver values:
+
+- `sanctum-spa`
+- `sanctum-token`
+- `none`
+
+Requirements:
+
+- Driver selection must happen during application initialization.
+- All drivers must implement the same authentication interface.
+- Invalid driver configuration must produce a clear error.
+- Missing optional configuration must use documented defaults.
+- Do not hardcode API endpoints throughout the application.
+
+Provide a development-only driver selector in Settings so developers can test different authentication modes without editing environment variables manually.
+
+Production driver selection must remain deployment-controlled unless an explicit runtime configuration mechanism is implemented.
+
+---
+
+#### 3. Authentication Architecture
+
+Implement an adapter/driver architecture.
+
+Suggested folder structure:
+
+```text
+src/
+├── auth/
+│   ├── drivers/
+│   │   ├── AuthDriver.ts
+│   │   ├── SanctumSpaDriver.ts
+│   │   ├── SanctumTokenDriver.ts
+│   │   └── NoAuthDriver.ts
+│   │
+│   ├── auth.config.ts
+│   ├── auth.factory.ts
+│   ├── auth.types.ts
+│   └── auth.provider.ts
+│
+├── composables/
+│   ├── useAuth.ts
+│   └── usePermissions.ts
+│
+├── stores/
+│   └── auth.store.ts
+│
+├── services/
+│   └── api.ts
+│
+├── router/
+│   └── guards/
+│       └── auth.guard.ts
+│
+└── pages/
+    └── auth/
+        ├── LoginPage.vue
+        ├── ForgotPasswordPage.vue
+        └── ResetPasswordPage.vue
+```
+
+Adjust the structure when necessary.
+
+##### Unified Auth Driver Interface
+
+Every authentication driver must implement the same interface.
+
+Example:
+
+```typescript
+export interface AuthDriverInterface {
+  initialize(): Promise<void>
+
+  login(credentials: LoginCredentials): Promise<void>
+
+  logout(): Promise<void>
+
+  getUser(): Promise<User | null>
+
+  checkAuth(): Promise<boolean>
+
+  isAuthenticated(): boolean
+}
+```
+
+Additional methods may be added when necessary.
+
+The interface should also support:
+
+- Authentication status.
+- Current user.
+- Loading state.
+- Authentication errors.
+- Session expiration.
+- Token expiration where applicable.
+
+The authentication driver must be initialized once and provided through a centralized authentication provider.
+
+Do not instantiate authentication drivers independently in individual pages.
+
+---
+
+#### 4. Driver A — Laravel Sanctum Stateful SPA
+
+Implement cookie-based session authentication using Laravel Sanctum.
+
+This is the recommended authentication mode for a first-party Vue SPA and Laravel backend sharing the same top-level domain.
+
+##### Authentication Flow
+
+1. User opens the login page.
+2. Frontend requests the configured CSRF endpoint.
+3. Laravel initializes the CSRF cookie.
+4. Frontend submits credentials to the configured login endpoint.
+5. Laravel authenticates the user and creates a session.
+6. Frontend requests the authenticated user profile.
+7. Authentication state is updated.
+8. User is redirected to the intended protected page.
+
+##### HTTP Client Requirements
+
+Configure Axios appropriately:
+
+```typescript
+axios.defaults.withCredentials = true
+axios.defaults.withXSRFToken = true
+```
+
+Ensure the following headers are included where appropriate:
+
+```text
+Accept: application/json
+Content-Type: application/json
+```
+
+Implement:
+
+- CSRF cookie initialization.
+- Automatic XSRF token handling.
+- Session cookie authentication.
+- Login.
+- Logout.
+- Current user retrieval.
+- Session expiration handling.
+- Unauthorized response handling.
+- CSRF expiration handling.
+
+##### Important
+
+Do not manually store session credentials or attempt to extract authentication cookies through JavaScript.
+
+The browser must manage session cookies.
+
+Handle:
+
+- HTTP 401: Unauthenticated or expired session.
+- HTTP 419: CSRF token or session-related expiration.
+
+Avoid redirect loops when the user is already on the login page.
+
+---
+
+#### 5. Driver B — Laravel Sanctum Personal Access Token
+
+Implement Bearer Token authentication using Laravel Sanctum Personal Access Tokens.
+
+This mode is intended for deployments where cookie-based SPA authentication is not suitable.
+
+##### Authentication Flow
+
+1. User opens the login page.
+2. User submits credentials.
+3. Frontend sends credentials to the configurable token-login endpoint.
+4. Backend validates credentials and issues a Sanctum Personal Access Token.
+5. Frontend extracts the token using the configured response path.
+6. Token is stored according to the selected storage strategy.
+7. Subsequent API requests include the token in the Authorization header.
+8. Frontend retrieves the authenticated user profile.
+
+##### Request Header
+
+```text
+Authorization: Bearer YOUR_ACCESS_TOKEN
+Accept: application/json
+```
+
+##### Requirements
+
+Implement:
+
+- Login using configurable endpoint.
+- Token extraction from configurable response structure.
+- Token storage abstraction.
+- Authorization header injection.
+- Current user retrieval.
+- Logout and server-side token revocation.
+- Token expiration handling.
+- Unauthorized response handling.
+- Clearing authentication state on logout.
+
+##### Token Storage Security
+
+Do not automatically store access tokens in localStorage.
+
+Default to in-memory storage.
+
+Optionally support sessionStorage through configuration, with an explicit security warning that JavaScript-accessible storage is vulnerable to token theft through XSS.
+
+Do not store credentials or passwords.
+
+Never log access tokens.
+
+Do not expose tokens through debugging output.
+
+##### Backend Compatibility
+
+Do not assume Laravel Sanctum provides a standard login endpoint.
+
+The token issuance endpoint is application-specific and must be configurable.
+
+Support configurable token response paths.
+
+Example response:
+
+```json
+{
+  "token": "1|example-token",
+  "user": {
+    "id": 1,
+    "name": "John Doe",
+    "email": "john@example.com"
+  }
+}
+```
+
+Allow alternative response structures, such as nested `data.token`.
+
+The frontend must not require the backend to use this exact example structure.
+
+---
+
+#### 6. Driver C — Authentication Disabled
+
+Implement a NoAuthDriver.
+
+This driver must completely disable authentication requirements.
+
+Intended use cases:
+
+- Local development.
+- Component showcase.
+- UI testing.
+- Public dashboard.
+- Applications that do not require authentication.
+
+Requirements:
+
+- No login page required.
+- No authentication API requests.
+- No token management.
+- No CSRF initialization.
+- No authentication redirects.
+- All application routes accessible unless separately restricted.
+- API requests must not include Authorization headers from previously used authentication drivers.
+
+Provide a predictable authentication state.
+
+For example:
+
+```typescript
+{
+  enabled: false,
+  isAuthenticated: true,
+  user: null,
+  loading: false
+}
+```
+
+The `isAuthenticated` value in this mode must not be interpreted as proof of an actual authenticated user.
+
+Use `enabled: false` to distinguish disabled authentication from real authentication.
+
+Do not create a fake authenticated user unless an explicit development mock-user feature is implemented separately.
+
+Make sure switching to this driver clears previous in-memory authentication credentials.
+
+---
+
+#### 7. Authentication State Management
+
+Create a centralized Pinia authentication store.
+
+Suggested state:
+
+```typescript
+interface AuthState {
+  enabled: boolean
+  driver: AuthDriver
+
+  user: User | null
+
+  isAuthenticated: boolean
+  isLoading: boolean
+
+  initialized: boolean
+
+  error: string | null
+}
+```
+
+Provide actions:
+
+- initializeAuth()
+- login()
+- logout()
+- fetchUser()
+- refreshAuth()
+- clearAuth()
+- setError()
+
+Expose a composable:
+
+```typescript
+const {
+  user,
+  isAuthenticated,
+  isLoading,
+  isAuthEnabled,
+  login,
+  logout,
+  refreshAuth
+} = useAuth()
+```
+
+Components must not communicate directly with authentication drivers.
+
+They should use `useAuth()`.
+
+Avoid duplicating authentication state between Pinia and individual components.
+
+---
+
+#### 8. API Client Integration
+
+Integrate authentication into the existing centralized API client.
+
+Do not create separate Axios instances unnecessarily.
+
+The API client must obtain authentication behavior from the active driver.
+
+Requirements:
+
+- Automatically attach Bearer tokens in token mode.
+- Send credentials in stateful SPA mode.
+- Avoid authentication headers in disabled mode.
+- Handle unauthorized responses centrally.
+- Prevent repeated redirects.
+- Handle network failures.
+- Support request cancellation.
+- Preserve existing DataTable API integration.
+
+The DataTable and other services must not need to know which authentication driver is active.
+
+---
+
+#### 9. Router Integration
+
+Create authentication-aware Vue Router guards.
+
+Support route metadata:
+
+```typescript
+{
+  path: '/users',
+  component: UsersPage,
+  meta: {
+    requiresAuth: true
+  }
+}
+```
+
+Also support:
+
+```typescript
+{
+  path: '/login',
+  component: LoginPage,
+  meta: {
+    guestOnly: true
+  }
+}
+```
+
+Requirements:
+
+##### When authentication is enabled
+
+- Protected routes require successful authentication.
+- Unauthenticated users are redirected to login.
+- Authenticated users cannot access guest-only pages unnecessarily.
+- Preserve the intended destination after login.
+- Initialize authentication before resolving protected routes.
+
+##### When authentication is disabled
+
+- Authentication guards must not block navigation.
+- Login routes may redirect to the default landing page or display an informational message.
+- All normal application routes remain accessible.
+
+Ensure route guards do not repeatedly fetch the current user on every navigation.
+
+---
+
+#### 10. Authentication UI
+
+Create reusable authentication pages using the existing DaisyUI component library and FormKit theme.
+
+##### Login Page
+
+Include:
+
+- Email or username.
+- Password.
+- Remember me (stateful mode only, when supported by backend).
+- Show/hide password.
+- Submit button.
+- Loading state.
+- Validation messages.
+- API error messages.
+
+##### Forgot Password
+
+Provide a configurable password reset workflow.
+
+Do not assume that password reset endpoints exist on every Laravel backend.
+
+##### Reset Password
+
+Support configurable reset endpoints and parameters.
+
+If an endpoint is not configured, clearly indicate that this feature is unavailable.
+
+##### Authentication Status
+
+Add authentication status information to the dashboard profile dropdown.
+
+Include:
+
+- Current user name.
+- Email.
+- Profile information.
+- Logout action.
+
+When authentication is disabled, do not display a misleading logged-in user profile.
+
+---
+
+#### 11. Settings Page Integration
+
+Add an Authentication Settings section.
+
+Display:
+
+- Current authentication driver.
+- Authentication enabled/disabled status.
+- API base URL.
+- Configured authentication endpoints.
+- Token storage strategy (token mode).
+- Authentication connection status.
+- Current authenticated user (when applicable).
+
+For development environments, provide a driver selector:
+
+- Sanctum Stateful SPA.
+- Sanctum Bearer Token.
+- No Authentication.
+
+Changing the selected driver must:
+
+1. Clear existing authentication state.
+2. Dispose of credentials associated with the previous driver.
+3. Initialize the new driver.
+4. Reinitialize the API client behavior.
+5. Reevaluate route access.
+6. Reload the application when necessary.
+
+Do not allow ordinary users to change production authentication configuration unless explicitly enabled by the application administrator.
+
+Never expose passwords, tokens, cookies, or other secrets in the settings interface.
+
+---
+
+#### 12. Backend Integration Documentation
+
+Create a dedicated documentation page explaining the Laravel backend requirements for each driver.
+
+##### Stateful SPA Documentation
+
+Explain:
+
+- Sanctum installation.
+- Stateful domain configuration.
+- Stateful API middleware.
+- CORS configuration.
+- Session cookie domain.
+- CSRF endpoint.
+- Login and logout routes.
+- Current user endpoint.
+
+##### Token Documentation
+
+Explain:
+
+- Sanctum installation.
+- HasApiTokens trait.
+- Token issuance endpoint.
+- Token response format.
+- Token abilities.
+- Token expiration.
+- Token revocation endpoint.
+
+Clearly distinguish frontend responsibilities from Laravel backend responsibilities.
+
+Do not automatically modify or assume access to a Laravel backend repository.
+
+Provide example Laravel implementation snippets where useful.
+
+---
+
+#### 13. Testing and Acceptance Criteria
+
+The authentication system is complete only when the following conditions are met.
+
+##### Driver Selection
+
+- [ ] All three authentication drivers are implemented.
+- [ ] Driver selection is centralized.
+- [ ] Driver initialization works.
+- [ ] Invalid configurations are handled.
+- [ ] Development driver switching works.
+
+##### Stateful SPA
+
+- [ ] CSRF initialization works.
+- [ ] Login works.
+- [ ] Session authentication works.
+- [ ] Current user retrieval works.
+- [ ] Logout works.
+- [ ] Session expiration is handled.
+- [ ] HTTP 401 and 419 responses are handled.
+
+##### Bearer Token
+
+- [ ] Login works with a configurable endpoint.
+- [ ] Token extraction supports configurable response paths.
+- [ ] Bearer headers are injected correctly.
+- [ ] Token storage works.
+- [ ] Logout revokes the token through the backend.
+- [ ] Token expiration and unauthorized responses are handled.
+- [ ] Tokens are never exposed in logs.
+
+##### No Authentication
+
+- [ ] No authentication requests are made.
+- [ ] No login redirect occurs.
+- [ ] No Authorization header is sent.
+- [ ] Protected routes remain accessible.
+- [ ] Previous authentication credentials are cleared.
+
+##### Application Integration
+
+- [ ] Vue Router guards work with all three drivers.
+- [ ] Pinia authentication state works.
+- [ ] useAuth() works throughout the application.
+- [ ] API client integration works.
+- [ ] DataTable remains compatible.
+- [ ] FormKit login forms work.
+- [ ] Dashboard profile menu reflects authentication state.
+- [ ] Theme switching remains functional.
+
+##### Quality
+
+- [ ] No major console errors.
+- [ ] No duplicated authentication logic.
+- [ ] No hardcoded authentication endpoints.
+- [ ] No accidental credential exposure.
+- [ ] Authentication architecture is extensible.
+
+---
+
+#### 14. Phase Completion Requirements
+
+Before moving to Phase 6:
+
+1. Explain the authentication architecture.
+2. Show the implemented driver structure.
+3. Demonstrate all three authentication modes.
+4. Verify the login and logout flows.
+5. Verify route guards.
+6. Verify API client integration.
+7. Document the Laravel backend requirements.
+8. List any features requiring backend implementation.
+9. Confirm all acceptance criteria.
+
+Use realistic mock authentication responses for local testing when a Laravel backend is unavailable.
+
+Clearly distinguish simulated authentication from actual Laravel Sanctum authentication.
+
+**Only begin Phase 6 — Quality Assurance after Phase 5 has been implemented and verified.**
+
+
+### Phase 6 — Quality Assurance
 - Test responsive behavior.
 - Test all component interactions.
 - Test theme switching and persistence.

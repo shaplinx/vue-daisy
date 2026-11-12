@@ -44,8 +44,8 @@ const stats = computed(() => [
   {
     id: 'milestone',
     title: 'Milestone',
-    value: '1 / 5',
-    description: 'Component foundation',
+    value: '4 / 5',
+    description: 'FormKit forms',
     icon: Sparkles,
     color: 'success',
   },
@@ -71,14 +71,14 @@ const highlights = [
     description: 'Reusable DataTable and Users CRUD demonstration with Laravel pagination.',
     to: '/data',
     icon: Database,
-    badge: 'Phase 3',
+    badge: 'Ready',
   },
   {
     title: 'FormKit integration',
-    description: 'DaisyUI-compatible FormKit theme with rich validation examples.',
+    description: 'DaisyUI-compatible FormKit theme with eight rich validation examples.',
     to: '/forms',
     icon: Users,
-    badge: 'Phase 4',
+    badge: 'Ready',
   },
 ]
 
@@ -86,7 +86,8 @@ const recent = [
   { id: 1, title: 'Component library completed', detail: `${components.length} components across ${componentCategories.length} categories`, tone: 'success' },
   { id: 2, title: 'DataTable completed', detail: 'Reusable table with client and server modes, native Laravel pagination', tone: 'success' },
   { id: 3, title: 'Users CRUD completed', detail: 'Create, view, edit and delete against the mock Laravel resource', tone: 'success' },
-  { id: 4, title: 'Next up: FormKit forms', detail: 'Schema-driven forms with validation and a matching theme', tone: 'warning' },
+  { id: 4, title: 'FormKit forms completed', detail: 'Themed built-in inputs, three custom controls, eight form demos and a DaisyUI theme', tone: 'success' },
+  { id: 5, title: 'Next up: quality assurance', detail: 'Responsive, interaction and cross-theme checks across the application', tone: 'warning' },
 ]
 
 const categoryCards = componentCategories.map((category) => ({
@@ -99,11 +100,11 @@ const categoryCards = componentCategories.map((category) => ({
   <section class="space-y-6">
     <header class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
       <div class="space-y-1">
-        <p class="text-xs font-semibold uppercase tracking-widest text-primary">Milestone 1</p>
+        <p class="text-xs font-semibold uppercase tracking-widest text-primary">Milestone 4</p>
         <h1 class="text-2xl font-bold tracking-tight sm:text-3xl">Dashboard</h1>
         <p class="max-w-2xl text-sm text-base-content/70">
-          The Vue Daisy component foundation is live. Explore the showcase, switch themes and inspect
-          how every DaisyUI component behaves in a real application shell.
+          The component library, data tables and FormKit forms are live. Explore the showcase, switch
+          themes and inspect every reusable pattern in a real application shell.
         </p>
       </div>
       <DzButton color="primary" to="/components">
@@ -176,17 +177,23 @@ const categoryCards = componentCategories.map((category) => ({
             </li>
             <li>
               <div class="mb-1 flex items-center justify-between text-xs">
-                <span>DataTable &amp; CRUD</span>
-                <span class="opacity-60">0%</span>
+                <span class="inline-flex items-center gap-1.5">
+                  <CheckCircle2 class="size-3.5 text-success" aria-hidden="true" />
+                  DataTable &amp; CRUD
+                </span>
+                <span class="opacity-60">100%</span>
               </div>
-              <DzProgress :value="0" size="sm" label="DataTable and CRUD" />
+              <DzProgress :value="100" color="success" size="sm" label="DataTable and CRUD" />
             </li>
             <li>
               <div class="mb-1 flex items-center justify-between text-xs">
-                <span>FormKit theme</span>
-                <span class="opacity-60">0%</span>
+                <span class="inline-flex items-center gap-1.5">
+                  <CheckCircle2 class="size-3.5 text-success" aria-hidden="true" />
+                  FormKit forms
+                </span>
+                <span class="opacity-60">100%</span>
               </div>
-              <DzProgress :value="0" size="sm" label="FormKit theme" />
+              <DzProgress :value="100" color="success" size="sm" label="FormKit forms" />
             </li>
           </ul>
         </div>

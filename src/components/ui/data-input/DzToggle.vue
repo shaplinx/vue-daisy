@@ -10,13 +10,22 @@ const props = defineProps({
   label: { type: String, default: '' },
   description: { type: String, default: '' },
   disabled: { type: Boolean, default: false },
+  invalid: { type: Boolean, default: false },
   name: { type: String, default: undefined },
+  id: { type: String, default: undefined },
+  ariaDescribedby: { type: String, default: undefined },
+  ariaRequired: { type: Boolean, default: false },
 })
 
-const emit = defineEmits(['update:modelValue', 'change'])
+const emit = defineEmits(['update:modelValue', 'change', 'blur'])
 
 const classes = computed(() =>
-  cn('toggle', modifier('toggle', props.size, SIZES), modifier('toggle', props.color, COLORS)),
+  cn(
+    'toggle',
+    modifier('toggle', props.size, SIZES),
+    modifier('toggle', props.color, COLORS),
+    { 'toggle-error': props.invalid },
+  ),
 )
 
 function onChange(event: Event): void {
@@ -36,8 +45,13 @@ function onChange(event: Event): void {
       :checked="modelValue"
       :disabled="disabled"
       :name="name"
+      :id="id"
+      :aria-describedby="ariaDescribedby"
+      :aria-required="ariaRequired || undefined"
+      :aria-invalid="invalid || undefined"
       :aria-label="label || 'Toggle'"
       @change="onChange"
+      @blur="emit('blur', $event)"
     />
     <span v-if="label || description || $slots.default" class="flex flex-col">
       <span class="text-sm font-medium"><slot>{{ label }}</slot></span>

@@ -10,6 +10,10 @@ const props = defineProps({
   color: { type: String, default: 'default' },
   joined: { type: Boolean, default: false },
   disabled: { type: Boolean, default: false },
+  invalid: { type: Boolean, default: false },
+  id: { type: String, default: undefined },
+  ariaDescribedby: { type: String, default: undefined },
+  ariaRequired: { type: Boolean, default: false },
   autofocus: { type: Boolean, default: false },
   label: { type: String, default: 'One-time password' },
   name: { type: String, default: 'otp' },
@@ -19,6 +23,7 @@ const emit = defineEmits<{
   'update:modelValue': [value: string]
   change: [value: string]
   complete: [value: string]
+  blur: [event: FocusEvent]
 }>()
 
 const input = ref<HTMLInputElement | null>(null)
@@ -28,7 +33,10 @@ const classes = computed(() =>
     'otp',
     modifier('otp', props.size, SIZES),
     modifier('otp', props.color, COLORS),
-    { 'otp-joined': props.joined },
+    {
+      'otp-joined': props.joined,
+      'otp-error': props.invalid,
+    },
   ),
 )
 
@@ -55,6 +63,7 @@ defineExpose({ focus: () => input.value?.focus(), input })
       <input
         ref="input"
         type="text"
+        :id="id"
         :name="name"
         :value="modelValue"
         :maxlength="length"
@@ -63,7 +72,11 @@ defineExpose({ focus: () => input.value?.focus(), input })
         autocomplete="one-time-code"
         :pattern="`[0-9]{${length}}`"
         :aria-label="label"
+        :aria-describedby="ariaDescribedby"
+        :aria-required="ariaRequired || undefined"
+        :aria-invalid="invalid || undefined"
         @input="onInput"
+        @blur="emit('blur', $event)"
       />
     </label>
   </div>

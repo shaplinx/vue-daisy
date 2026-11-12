@@ -10,11 +10,15 @@
     "typecheck": "vue-tsc --noEmit"
   },
   "dependencies": {
+    "@formkit/core": "^2.5.0",
+    "@formkit/inputs": "2.5.0",
+    "@formkit/vue": "^2.5.0",
     "@lucide/vue": "^1.71.0",
     "vue": "^3.5.45",
     "vue-router": "^5.4.0"
   },
   "devDependencies": {
+    "@formkit/themes": "^2.5.0",
     "@tailwindcss/vite": "^4.3.5",
     "@types/node": "^26.6.6",
     "@vitejs/plugin-vue": "^6.0.10",
