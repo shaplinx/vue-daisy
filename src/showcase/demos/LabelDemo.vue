@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import { useDemoMode } from '@/showcase/useDemoMode'
 
 const mode = useDemoMode()
-const name = ref('Alex Morgan')
+const name = ref('Reza Irfan')
 </script>
 
 <template>

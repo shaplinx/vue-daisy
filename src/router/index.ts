@@ -34,6 +34,12 @@ const routes = [
         meta: { title: 'Data Management', icon: 'Database', breadcrumb: 'Data Management' },
       },
       {
+        path: 'media',
+        name: 'media',
+        component: () => import('@/pages/MediaLibraryPage.vue'),
+        meta: { title: 'Media Library', icon: 'Images', breadcrumb: 'Media Library' },
+      },
+      {
         path: 'forms',
         name: 'forms',
         component: () => import('@/pages/FormShowcasePage.vue'),

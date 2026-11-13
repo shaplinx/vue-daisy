@@ -30,7 +30,7 @@ const mode = useDemoMode()
             </span>
           </template>
         </DzButton>
-        <DzAvatar size="sm" alt="Alex Morgan" placeholder="AM" ring="primary" />
+        <DzAvatar size="sm" alt="Reza Irfan" placeholder="AM" ring="primary" />
       </template>
     </DzNavbar>
     <p class="text-xs text-base-content/60">Start, center and end slots keep responsive alignment predictable.</p>

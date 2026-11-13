@@ -13,7 +13,7 @@ const columns = [
 ]
 
 const rows = [
-  { id: 1, name: 'Alex Morgan', role: 'Administrator', status: 'Active', joined: '2024-01-12' },
+  { id: 1, name: 'Reza Irfan', role: 'Administrator', status: 'Active', joined: '2024-01-12' },
   { id: 2, name: 'Jamie Lee', role: 'Designer', status: 'Active', joined: '2024-02-03' },
   { id: 3, name: 'Riley Kim', role: 'Developer', status: 'Invited', joined: '2024-03-18' },
   { id: 4, name: 'Sam Patel', role: 'Analyst', status: 'Suspended', joined: '2024-04-02' },

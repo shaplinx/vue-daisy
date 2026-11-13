@@ -283,7 +283,7 @@ export const components: RegistryComponent[] = [
     ],
     events: [],
     slots: [],
-    source: `<DzAvatar src="/alex.jpg" alt="Alex Morgan" ring="primary" status="online" />`,
+    source: `<DzAvatar src="/alex.jpg" alt="Reza Irfan" ring="primary" status="online" />`,
   },
   {
     id: 'aura',

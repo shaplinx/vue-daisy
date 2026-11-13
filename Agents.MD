@@ -1331,14 +1331,36 @@ Before moving to Phase 6:
 8. List any features requiring backend implementation.
 9. Confirm all acceptance criteria.
 
-Use realistic mock authentication responses for local testing when a Laravel backend is unavailable.
 
-Clearly distinguish simulated authentication from actual Laravel Sanctum authentication.
+### Phase 6 - Build Media Liblary
+Build a feature-rich, production-ready Vue 3 Single File Component (SFC) for a WordPress-style Media Library and Uploader modal using Tailwind CSS, DaisyUI, and our custom Vue component library located at `@/src/components/ui`.
 
-**Only begin Phase 6 — Quality Assurance after Phase 5 has been implemented and verified.**
+### Core Requirements:
+Build a feature-rich, production-ready Vue 3 Single File Component (SFC) for a WordPress-style Media Library and Uploader modal using Tailwind CSS, DaisyUI, and our custom Vue component library located at `@/src/components/ui`.
+
+1. **Framework & Architecture**: 
+   - Use custom components from `@/src/components/ui` (e.g., custom buttons, modals, tabs, input fields, badges) as the primary building blocks instead of raw HTML elements where applicable.
+2. **Two Operating Modes (Prop-driven)**:
+   - Pass a prop like `mode: 'management' | 'selector'` to handle both use cases:
+     - **Mode 1 (Media Management)**: Full CRUD view for managing, editing metadata, deleting, and bulk-downloading assets.
+     - **Mode 2 (Image Selector for Editor)**: Modal used inside a content editor to select images, showing an action footer like "Insert Media (X)".
+3. **Infinite Scroll Pagination**:
+   - The media grid container should be scrollable with a fixed height.
+   - Implement an Intersection Observer at the bottom of the grid to automatically load the next batch of assets, displaying a loading state (e.g., "Loading more assets...") when fetching.
+4. **Layout & UX Features**:
+   - **Header Tabs**: Switch between an "Upload Files" tab (drag-and-drop zone) and a "Media Library" tab (thumbnail grid view).
+   - **Search & Filters**: Real-time search input to filter media by filename/title.
+   - **Main Grid**: Responsive thumbnail grid with selection checkboxes. Selected items should feature a distinct active border and checkmark badge.
+   - **Attachment Details Sidebar**: Clicking an image opens a sticky right-hand panel displaying a larger preview, file dimensions, file size, upload date, and editable fields for Alt Text, Title, Caption, and Description.
+   - **Dynamic Footer**: Button states and labels dynamically update based on the current mode and the count of currently selected items (e.g., "Insert Media (2)" or "Delete Selected").
+
+Make sure to leave data api handling outside the component. and please make clear documentation of it.
 
 
-### Phase 6 — Quality Assurance
+**Only begin Phase 7 — Quality Assurance after Phase 6 has been implemented and verified.**
+
+
+### Phase 7 — Quality Assurance
 - Test responsive behavior.
 - Test all component interactions.
 - Test theme switching and persistence.
@@ -1347,6 +1369,8 @@ Clearly distinguish simulated authentication from actual Laravel Sanctum authent
 - Test FormKit validation.
 - Fix console errors and warnings.
 - Ensure there are no broken routes or nonfunctional controls.
+
+When it's done, update the phase progress and milestonrs in the dashboard as completed then create suitable README.md for this project.
 
 ---
 

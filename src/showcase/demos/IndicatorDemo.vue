@@ -19,7 +19,7 @@ const mode = useDemoMode()
         </DzButton>
       </DzIndicator>
       <DzIndicator badge="New" color="success" placement="bottom-start" aria-label="Status">
-        <DzAvatar alt="Alex Morgan" placeholder="AM" ring="primary" />
+        <DzAvatar alt="Reza Irfan" placeholder="AM" ring="primary" />
       </DzIndicator>
       <DzIndicator badge="" aria-label="Favourite">
         <template #indicator>
