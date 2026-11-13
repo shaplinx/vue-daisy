@@ -14,7 +14,7 @@ const colors = ['primary', 'secondary', 'accent', 'info', 'success', 'warning', 
     <DzTooltip text="Delayed by 500ms" :delay="500" position="bottom" color="primary">
       <DzButton variant="soft" color="primary">Delayed tooltip</DzButton>
     </DzTooltip>
-    <DzTooltip position="right" color="secondary">
+    <DzTooltip position="bottom" color="secondary">
       <template #content>
         <span class="font-semibold">Rich content</span>
         <span class="mt-1 block text-xs opacity-80">Tooltips can use a content slot.</span>

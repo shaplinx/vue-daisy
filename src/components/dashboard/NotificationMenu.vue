@@ -8,7 +8,7 @@ import { useToast } from '@/composables/useToast'
 
 const toast = useToast()
 const notifications = ref([
-  { id: 1, title: 'Component library ready', message: '68 DaisyUI components are now available.', time: 'Just now', read: false },
+  { id: 1, title: 'Component library ready', message: '69 DaisyUI components are now available.', time: 'Just now', read: false },
   { id: 2, title: 'Theme updated', message: 'Your theme preference is saved locally.', time: '12 min ago', read: false },
   { id: 3, title: 'Milestone 1', message: 'Dashboard shell and showcase are complete.', time: '1 hr ago', read: true },
 ])

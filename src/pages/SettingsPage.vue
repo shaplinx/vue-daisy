@@ -129,7 +129,7 @@ const activeTheme = computed(() => currentTheme.value?.label || 'Light')
       <div class="grid gap-4 p-4 text-sm sm:grid-cols-2">
         <dl class="space-y-2">
           <div class="flex justify-between gap-4"><dt class="opacity-60">Version</dt><dd class="font-medium">0.1.0</dd></div>
-          <div class="flex justify-between gap-4"><dt class="opacity-60">Milestone</dt><dd class="font-medium">5 — Authentication drivers</dd></div>
+          <div class="flex justify-between gap-4"><dt class="opacity-60">Milestone</dt><dd class="font-medium">7 — Quality assurance (complete)</dd></div>
           <div class="flex justify-between gap-4"><dt class="opacity-60">Vue</dt><dd class="font-medium">3.5</dd></div>
         </dl>
         <dl class="space-y-2">

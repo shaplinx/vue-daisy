@@ -66,7 +66,7 @@ async function signOut(): Promise<void> {
           :ring="user ? 'primary' : undefined"
           :status="user ? 'online' : undefined"
         />
-        <span class="hidden text-start sm:block">
+        <span class="hidden text-start lg:block">
           <span class="block max-w-36 truncate text-xs font-semibold leading-tight">
             {{ displayName }}
           </span>

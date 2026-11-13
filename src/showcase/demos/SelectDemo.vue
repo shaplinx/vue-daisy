@@ -35,17 +35,17 @@ const frameworkOptions = [
 
 <template>
   <div v-if="mode !== 'variants'" class="grid max-w-2xl gap-4 sm:grid-cols-2">
-    <div class="form-control">
+    <div class="form-control min-w-0">
       <span class="label-text mb-1">Role</span>
-      <DzSelect v-model="role" :options="roles" aria-label="Role" />
+      <DzSelect v-model="role" :options="roles" class="w-full" aria-label="Role" />
     </div>
-    <div class="form-control">
+    <div class="form-control min-w-0">
       <span class="label-text mb-1">Country (grouped)</span>
-      <DzSelect v-model="country" :options="countries" placeholder="Select a country" aria-label="Country" />
+      <DzSelect v-model="country" :options="countries" class="w-full" placeholder="Select a country" aria-label="Country" />
     </div>
-    <div class="form-control sm:col-span-2">
+    <div class="form-control min-w-0 sm:col-span-2">
       <span class="label-text mb-1">Frameworks (multiple)</span>
-      <DzSelect v-model="frameworks" :options="frameworkOptions" multiple aria-label="Frameworks" />
+      <DzSelect v-model="frameworks" :options="frameworkOptions" class="w-full" multiple aria-label="Frameworks" />
     </div>
     <p class="text-xs text-base-content/60 sm:col-span-2">
       Role: <span class="badge badge-ghost badge-sm">{{ role || 'none' }}</span>

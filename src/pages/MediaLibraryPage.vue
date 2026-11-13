@@ -412,7 +412,7 @@ const endpoints = [
       </header>
 
       <div class="grid gap-4 lg:grid-cols-2">
-        <div class="space-y-4">
+        <div class="min-w-0 space-y-4">
           <div class="overflow-x-auto rounded-box border border-base-300">
             <table class="table table-sm">
               <thead>
@@ -468,7 +468,7 @@ const endpoints = [
           </p>
         </div>
 
-        <div class="space-y-4">
+        <div class="min-w-0 space-y-4">
           <CodeBlock :code="componentUsage" filename="MediaLibraryExample.vue" />
           <CodeBlock :code="serviceUsage" language="ts" filename="src/services/mediaService.ts" />
         </div>

@@ -24,7 +24,7 @@ const roles = [
 
 <template>
   <div class="space-y-2">
-    <FormKit id="repeating-form" type="form" :actions="false" @submit="submit">
+    <FormKit id="formkit-repeating-form" type="form" :actions="false" @submit="submit">
       <FormKit type="list" name="contacts" v-model="contacts" dynamic sync>
         <template #default="{ items, node, value }">
           <div class="space-y-3">

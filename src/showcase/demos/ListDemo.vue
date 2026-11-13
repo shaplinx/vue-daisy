@@ -10,7 +10,7 @@ const toast = useToast()
 const items = ref([
   { id: 1, icon: Folder, title: 'Design assets', description: '24 files · updated 2 hours ago' },
   { id: 2, icon: Image, title: 'hero-aurora.png', description: '2400 × 1600 · 1.8 MB' },
-  { id: 3, icon: FileText, title: 'component-inventory.md', description: '68 components documented' },
+  { id: 3, icon: FileText, title: 'component-inventory.md', description: '69 components documented' },
   { id: 4, icon: Music, title: 'notification.mp3', description: '0:04 · 96 kbps' },
 ])
 

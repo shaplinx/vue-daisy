@@ -8,7 +8,7 @@ const { status, submitting, submit } = useDemoForm({ message: 'Signed in success
 
 <template>
   <div class="space-y-2">
-    <FormKit id="login-form" type="form" :actions="false" @submit="submit">
+    <FormKit id="formkit-login-form" type="form" :actions="false" @submit="submit">
       <div class="mx-auto w-full max-w-md space-y-4">
         <FormKit
           type="email"

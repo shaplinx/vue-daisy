@@ -9,7 +9,7 @@ const { status, submitting, lastSubmission, submit } = useDemoForm({
   message: 'Account created successfully',
 })
 
-const registrationForm = useFormKitNodeById('registration-form')
+const registrationForm = useFormKitNodeById('formkit-registration-form')
 
 function reset(): void {
   registrationForm.value?.reset()
@@ -25,7 +25,7 @@ const roles = [
 
 <template>
   <div class="space-y-2">
-    <FormKit id="registration-form" type="form" :actions="false" @submit="submit">
+    <FormKit id="formkit-registration-form" type="form" :actions="false" @submit="submit">
       <FormGrid>
         <FormKit
           type="text"

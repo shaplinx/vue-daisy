@@ -70,7 +70,7 @@ function clearAll() {
     </div>
     <div>
       <p class="mb-2 text-xs font-semibold uppercase tracking-widest opacity-50">Titles &amp; icons</p>
-      <DzButton color="primary" variant="outline" @click="toast.success('All 68 components are interactive.', { title: 'Component library ready', duration: 5000 })">
+      <DzButton color="primary" variant="outline" @click="toast.success('All 69 components are interactive.', { title: 'Component library ready', duration: 5000 })">
         <template #icon><Bell class="size-4" aria-hidden="true" /></template>
         Rich notification
       </DzButton>

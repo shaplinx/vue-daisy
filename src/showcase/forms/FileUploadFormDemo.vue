@@ -40,7 +40,7 @@ const uploadedFileNames = computed(() => {
 
 <template>
   <div class="space-y-2">
-    <FormKit id="file-upload-form" type="form" :actions="false" @submit="submit">
+    <FormKit id="formkit-file-upload-form" type="form" :actions="false" @submit="submit">
       <FormGrid>
         <FormKit
           type="text"

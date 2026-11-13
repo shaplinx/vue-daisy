@@ -32,8 +32,8 @@ const textClassification = {
  * layout; each input file only sets its own DaisyUI control class.
  */
 const boxClassification = {
-  wrapper: 'label flex cursor-pointer items-center gap-2.5',
-  label: 'cursor-pointer',
+  wrapper: 'label flex cursor-pointer items-center gap-2.5 whitespace-normal',
+  label: 'min-w-0 cursor-pointer whitespace-normal',
   fieldset: 'flex min-w-0 flex-col gap-2 border-0 p-0',
   inner: 'flex items-center',
   options: 'mt-2 flex flex-col gap-2',

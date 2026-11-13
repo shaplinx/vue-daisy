@@ -8,14 +8,8 @@ import type {
   User,
 } from '@/auth/auth.types'
 import { AuthError } from '@/auth/auth.types'
-import {
-  getAuthConfig,
-  getAuthDriver,
-  onAuthUnauthorized,
-  switchAuthDriver,
-} from '@/auth/auth.provider'
+import { getAuthConfig, getAuthDriver, switchAuthDriver } from '@/auth/auth.provider'
 import { toAuthError } from '@/auth/utils'
-import { useToast } from '@/composables/useToast'
 
 /**
  * Centralized Pinia authentication store.
@@ -53,27 +47,21 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   /**
-   * HTTP 401 from the shared client. A 401 during boot or sign-in is a
-   * normal "not authenticated yet" answer, not an expiring session.
+   * Handle an HTTP 401 from the shared client by clearing the local session.
+   *
+   * A 401 during boot or sign-in is a normal "not authenticated yet" answer,
+   * not an expiring session. Returns `true` only when an active session was
+   * invalidated, so the caller (the router guard) can redirect to login.
    */
-  function handleUnauthorized(): void {
-    if (!initialized.value || !enabled.value) return
+  function expireSession(): boolean {
+    if (!initialized.value || !enabled.value) return false
     const wasAuthenticated = isAuthenticated.value
     clearAuth()
-    if (!wasAuthenticated) return
+    if (!wasAuthenticated) return false
 
     error.value = 'Your session has expired. Please sign in again.'
-    void (async () => {
-      const { default: router } = await import('@/router')
-      const current = router.currentRoute.value
-      if (current.name === 'login') return
-      useToast().warning('Your session expired. Please sign in again.')
-      await router.push({ name: 'login', query: { redirect: current.fullPath } })
-    })()
+    return true
   }
-
-  const unsubscribe = onAuthUnauthorized(handleUnauthorized)
-  void unsubscribe // store lives for the application lifetime
 
   /**
    * Initialize authentication exactly once. Safe to await on every
@@ -236,6 +224,7 @@ export const useAuthStore = defineStore('auth', () => {
     resetPassword,
     switchDriver,
     clearAuth,
+    expireSession,
     setError,
   }
 })

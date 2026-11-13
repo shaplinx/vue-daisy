@@ -282,7 +282,7 @@ const usageSnippet = `<FormKit type="form" :actions="false" @submit="submit">
           {{ rule }}
         </li>
       </ul>
-      <p class="mt-4 flex items-start gap-2 text-xs text-base-content/60">
+      <p class="mt-4 flex flex-wrap items-start gap-2 text-xs text-base-content/60">
         <FileUp class="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
         The built-in file input is validated by the custom
         <code class="rounded bg-base-200 px-1 py-0.5">maxFileSize</code> rule, which understands

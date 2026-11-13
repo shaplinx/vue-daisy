@@ -44,8 +44,8 @@ const stats = computed(() => [
   {
     id: 'milestone',
     title: 'Milestone',
-    value: '4 / 5',
-    description: 'FormKit forms',
+    value: '7 / 7',
+    description: 'All phases complete',
     icon: Sparkles,
     color: 'success',
   },
@@ -54,7 +54,7 @@ const stats = computed(() => [
 const highlights = [
   {
     title: 'Interactive component showcase',
-    description: '68 live demos with preview, variants, API tables and copyable source.',
+    description: '69 live demos with preview, variants, API tables and copyable source.',
     to: '/components',
     icon: Blocks,
     badge: 'Ready',
@@ -87,7 +87,7 @@ const recent = [
   { id: 2, title: 'DataTable completed', detail: 'Reusable table with client and server modes, native Laravel pagination', tone: 'success' },
   { id: 3, title: 'Users CRUD completed', detail: 'Create, view, edit and delete against the mock Laravel resource', tone: 'success' },
   { id: 4, title: 'FormKit forms completed', detail: 'Themed built-in inputs, three custom controls, eight form demos and a DaisyUI theme', tone: 'success' },
-  { id: 5, title: 'Next up: quality assurance', detail: 'Responsive, interaction and cross-theme checks across the application', tone: 'warning' },
+  { id: 5, title: 'Quality assurance completed', detail: 'Responsive, interaction, theme, CRUD, pagination and FormKit checks passed', tone: 'success' },
 ]
 
 const categoryCards = componentCategories.map((category) => ({
@@ -100,10 +100,10 @@ const categoryCards = componentCategories.map((category) => ({
   <section class="space-y-6">
     <header class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
       <div class="space-y-1">
-        <p class="text-xs font-semibold uppercase tracking-widest text-primary">Milestone 4</p>
+        <p class="text-xs font-semibold uppercase tracking-widest text-primary">Milestone 7</p>
         <h1 class="text-2xl font-bold tracking-tight sm:text-3xl">Dashboard</h1>
         <p class="max-w-2xl text-sm text-base-content/70">
-          The component library, data tables and FormKit forms are live. Explore the showcase, switch
+          All seven phases are complete and quality-assured. Explore the component showcase, switch
           themes and inspect every reusable pattern in a real application shell.
         </p>
       </div>
@@ -194,6 +194,16 @@ const categoryCards = componentCategories.map((category) => ({
                 <span class="opacity-60">100%</span>
               </div>
               <DzProgress :value="100" color="success" size="sm" label="FormKit forms" />
+            </li>
+            <li>
+              <div class="mb-1 flex items-center justify-between text-xs">
+                <span class="inline-flex items-center gap-1.5">
+                  <CheckCircle2 class="size-3.5 text-success" aria-hidden="true" />
+                  Quality assurance
+                </span>
+                <span class="opacity-60">100%</span>
+              </div>
+              <DzProgress :value="100" color="success" size="sm" label="Quality assurance" />
             </li>
           </ul>
         </div>

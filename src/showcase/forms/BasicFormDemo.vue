@@ -16,7 +16,7 @@ const topics = [
 <template>
   <div class="space-y-2">
     <FormKit
-      id="basic-contact-form"
+      id="formkit-basic-contact-form"
       type="form"
       submit-label="Send message"
       :submit-attrs="{ class: 'w-full sm:w-auto' }"

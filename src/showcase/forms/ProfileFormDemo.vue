@@ -38,7 +38,7 @@ const languages = [
   { label: '日本語', value: 'ja' },
 ]
 
-const profileForm = useFormKitNodeById('profile-form')
+const profileForm = useFormKitNodeById('formkit-profile-form')
 
 function reset(): void {
   profileForm.value?.reset()
@@ -47,7 +47,7 @@ function reset(): void {
 
 <template>
   <div class="space-y-2">
-    <FormKit id="profile-form" type="form" :value="profile" :actions="false" @submit="submit">
+    <FormKit id="formkit-profile-form" type="form" :value="profile" :actions="false" @submit="submit">
       <FormGrid>
         <FormKit type="text" name="fullName" label="Full name" validation="required|alpha_spaces" />
         <FormKit type="email" name="email" label="Email" validation="required|email" />

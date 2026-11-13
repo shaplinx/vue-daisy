@@ -20,7 +20,7 @@ const contactOptions = [
 
 <template>
   <div class="space-y-2">
-    <FormKit id="validation-form" type="form" :actions="false" @submit="submit">
+    <FormKit id="formkit-validation-form" type="form" :actions="false" @submit="submit">
       <FormGrid>
         <FormKit
           type="text"

@@ -51,12 +51,12 @@ function goTo(page: number): void {
 </script>
 
 <template>
-  <div class="flex flex-col items-center gap-2 sm:flex-row sm:justify-between">
+  <div class="flex min-w-0 flex-col items-center gap-2 sm:flex-row sm:justify-between">
     <div v-if="total" class="text-xs opacity-60" aria-live="polite">
       Page {{ current }} of {{ totalPages }} · {{ total }} records
     </div>
 
-    <nav :aria-label="ariaLabel">
+    <nav :aria-label="ariaLabel" class="max-w-full overflow-x-auto">
       <div :class="classes">
         <button
           v-if="showEdges"

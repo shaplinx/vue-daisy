@@ -22,7 +22,7 @@ const emit = defineEmits(['toggle-sidebar'])
       <Menu class="size-5" aria-hidden="true" />
     </button>
 
-    <div class="hidden w-full md:block">
+    <div class="hidden min-w-0 flex-1 md:block">
       <AppBreadcrumbs />
     </div>
 

@@ -65,7 +65,7 @@ const postalLabel = computed(() => {
       </span>
     </div>
 
-    <FormKit id="conditional-form" type="form" :actions="false" @submit="submit">
+    <FormKit id="formkit-conditional-form" type="form" :actions="false" @submit="submit">
       <FormGrid>
         <FormKit
           type="radio"

@@ -11,7 +11,7 @@ const activeLabel = computed(() => currentTheme.value?.label || 'Light')
 <template>
   <section class="space-y-6">
     <header class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-      <div class="space-y-1">
+      <div class="min-w-0 space-y-1">
         <h1 class="text-2xl font-bold tracking-tight sm:text-3xl">Theme Settings</h1>
         <p class="max-w-2xl text-sm text-base-content/70">
           Pick one of the six DaisyUI themes below. Your choice is saved in
@@ -19,7 +19,7 @@ const activeLabel = computed(() => currentTheme.value?.label || 'Light')
           on the next visit.
         </p>
       </div>
-      <div class="flex items-center gap-2">
+      <div class="flex flex-wrap items-center gap-2">
         <span class="badge badge-primary gap-1">
           <Palette class="size-3" aria-hidden="true" />
           {{ activeLabel }}
