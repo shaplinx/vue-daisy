@@ -4,7 +4,7 @@ import { registerAuthGuard } from './guards/auth.guard'
 const routes = [
   {
     path: '/',
-    redirect: '/components',
+    redirect: '/dashboard',
   },
   {
     path: '/',
