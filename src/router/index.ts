@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { registerAuthGuard } from './guards/auth.guard'
 
 const routes = [
   {
@@ -8,6 +9,7 @@ const routes = [
   {
     path: '/',
     component: () => import('@/layouts/DashboardLayout.vue'),
+    meta: { requiresAuth: true },
     children: [
       {
         path: 'dashboard',
@@ -49,6 +51,41 @@ const routes = [
         component: () => import('@/pages/ThemeSettingsPage.vue'),
         meta: { title: 'Theme Settings', icon: 'Palette', breadcrumb: 'Theme Settings' },
       },
+      {
+        path: 'backend-integration',
+        name: 'backend-integration',
+        component: () => import('@/pages/AuthDocsPage.vue'),
+        meta: {
+          title: 'Backend Integration',
+          icon: 'ShieldCheck',
+          breadcrumb: 'Backend Integration',
+        },
+      },
+    ],
+  },
+  {
+    path: '/',
+    component: () => import('@/layouts/AuthLayout.vue'),
+    meta: { guestOnly: true },
+    children: [
+      {
+        path: 'login',
+        name: 'login',
+        component: () => import('@/pages/auth/LoginPage.vue'),
+        meta: { title: 'Sign in', breadcrumb: 'Sign in' },
+      },
+      {
+        path: 'forgot-password',
+        name: 'forgot-password',
+        component: () => import('@/pages/auth/ForgotPasswordPage.vue'),
+        meta: { title: 'Forgot password', breadcrumb: 'Forgot password' },
+      },
+      {
+        path: 'reset-password',
+        name: 'reset-password',
+        component: () => import('@/pages/auth/ResetPasswordPage.vue'),
+        meta: { title: 'Reset password', breadcrumb: 'Reset password' },
+      },
     ],
   },
   {
@@ -68,6 +105,8 @@ const router = createRouter({
     return { top: 0 }
   },
 })
+
+registerAuthGuard(router)
 
 router.afterEach((to) => {
   const title = to.meta?.title

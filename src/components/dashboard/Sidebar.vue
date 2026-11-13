@@ -9,6 +9,7 @@ import {
   LayoutDashboard,
   Palette,
   Settings,
+  ShieldCheck,
 } from '@lucide/vue'
 import DzMenu from '@/components/ui/navigation/DzMenu.vue'
 import type { MenuItemData } from '@/components/ui/navigation/DzMenuItem.vue'
@@ -52,6 +53,12 @@ const groups = computed(() => [
     items: [
       { id: 'settings', label: 'Settings', to: '/settings', icon: Settings },
       { id: 'themes', label: 'Theme Settings', to: '/themes', icon: Palette },
+      {
+        id: 'backend-integration',
+        label: 'Backend Integration',
+        to: '/backend-integration',
+        icon: ShieldCheck,
+      },
     ],
   },
 ])

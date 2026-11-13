@@ -18,7 +18,7 @@ const items = [
 <template>
   <div v-if="mode !== 'variants'" class="space-y-3">
     <div class="mx-auto max-w-xl rounded-box border border-base-300 bg-base-200 p-3">
-      <DzDock aria-label="Bottom navigation">
+      <DzDock class="relative" aria-label="Bottom navigation">
         <button
           v-for="item in items"
           :key="item.id"

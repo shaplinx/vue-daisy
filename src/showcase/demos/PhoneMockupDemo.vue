@@ -17,7 +17,7 @@ const tabs = [
   <div v-if="mode !== 'variants'" class="space-y-3">
     <div class="flex flex-wrap items-start gap-6">
       <DzPhoneMockup>
-        <div class="flex h-full w-64 flex-col bg-base-100">
+        <div class="flex h-full flex-col bg-base-100">
           <div class="relative h-40">
             <img :src="gradientC" alt="Ocean gradient cover" class="size-full object-cover" />
             <div class="absolute inset-x-0 bottom-0 flex items-end justify-between p-4 text-white">
@@ -68,13 +68,13 @@ const tabs = [
     <div>
       <p class="mb-2 text-xs font-semibold uppercase tracking-widest opacity-50">Image screen</p>
       <DzPhoneMockup>
-        <img :src="gradientC" alt="Ocean gradient screen" class="h-full w-64 object-cover" />
+        <img :src="gradientC" alt="Ocean gradient screen" class="h-full object-cover" />
       </DzPhoneMockup>
     </div>
     <div>
       <p class="mb-2 text-xs font-semibold uppercase tracking-widest opacity-50">Custom content</p>
       <DzPhoneMockup content-class="bg-base-200 p-4">
-        <div class="flex h-full w-64 flex-col justify-between">
+        <div class="flex h-full flex-col justify-between">
           <div class="space-y-2">
             <p class="text-xs font-semibold uppercase tracking-widest opacity-50">Welcome back</p>
             <p class="text-xl font-bold">Ada Lovelace</p>

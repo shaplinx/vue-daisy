@@ -24,7 +24,7 @@
  */
 const textClassification = {
   wrapper: 'flex flex-col gap-1.5',
-  inner: 'flex w-full items-center gap-2 input w-full focus:input-primary formkit-invalid:input-error formkit-errors:input-error',
+  inner: 'flex w-full items-center gap-2 input w-full focus-within:input-primary formkit-invalid:input-error formkit-errors:input-error',
 }
 
 /**

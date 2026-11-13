@@ -15,7 +15,7 @@ const nav = [
 
 <template>
   <div v-if="mode !== 'variants'" class="space-y-3">
-    <div class="h-80 overflow-hidden rounded-box border border-base-300">
+    <div class="h-80 overflow-hidden rounded-box border border-base-300 relative">
       <DzDrawer v-model="open" responsive="none" width="w-64" content-class="h-full">
         <template #sidebar>
           <div class="flex h-full flex-col gap-4 p-4">

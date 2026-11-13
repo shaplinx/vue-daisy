@@ -30,7 +30,7 @@ const alerts = [
       @close="toast.info(`${alert.title} alert dismissed`)"
     />
 
-    <DzAlert v-model="visible" color="primary" variant="soft" title="Controlled visibility" description="This alert is bound with v-model." closable />
+    <DzAlert v-model="visible" color="primary" variant="soft"  title="Controlled visibility" description="This alert is bound with v-model." closable />
     <DzButton v-if="!visible" size="sm" variant="outline" @click="visible = true">Show controlled alert again</DzButton>
   </div>
 

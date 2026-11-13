@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 import { Bell, Check, Info, Palette, RotateCcw, SunMoon } from '@lucide/vue'
 import { useTheme } from '@/composables/useTheme'
 import { useToast } from '@/composables/useToast'
+import AuthSettingsPanel from '@/components/auth/AuthSettingsPanel.vue'
 
 const { theme, currentTheme, isDark, setTheme } = useTheme()
 const toast = useToast()
@@ -53,8 +54,8 @@ const activeTheme = computed(() => currentTheme.value?.label || 'Light')
     <header class="space-y-1">
       <h1 class="text-2xl font-bold tracking-tight sm:text-3xl">Settings</h1>
       <p class="max-w-2xl text-sm text-base-content/70">
-        Application preferences stored locally in your browser. No account or backend is required for
-        this demo.
+        Application preferences stored locally in your browser. Authentication driver
+        configuration is managed in the section below.
       </p>
     </header>
 
@@ -116,6 +117,8 @@ const activeTheme = computed(() => currentTheme.value?.label || 'Light')
       </div>
     </div>
 
+    <AuthSettingsPanel />
+
     <div class="rounded-box border border-base-300 bg-base-100">
       <div class="border-b border-base-300 p-4">
         <h2 class="flex items-center gap-2 font-semibold">
@@ -126,7 +129,7 @@ const activeTheme = computed(() => currentTheme.value?.label || 'Light')
       <div class="grid gap-4 p-4 text-sm sm:grid-cols-2">
         <dl class="space-y-2">
           <div class="flex justify-between gap-4"><dt class="opacity-60">Version</dt><dd class="font-medium">0.1.0</dd></div>
-          <div class="flex justify-between gap-4"><dt class="opacity-60">Milestone</dt><dd class="font-medium">1 — Component foundation</dd></div>
+          <div class="flex justify-between gap-4"><dt class="opacity-60">Milestone</dt><dd class="font-medium">5 — Authentication drivers</dd></div>
           <div class="flex justify-between gap-4"><dt class="opacity-60">Vue</dt><dd class="font-medium">3.5</dd></div>
         </dl>
         <dl class="space-y-2">
